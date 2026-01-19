@@ -9,42 +9,58 @@ const PROXY_URL = typeof process !== 'undefined' && process.env?.PROXY_URL
   : 'http://localhost:3000';
 
 async function fetchTextWithMeta(url, useProxy = false) {
-  let fetchUrl = url;
-  let options = { method: "GET" };
+  // Try direct fetch first (many healthcare.gov CSVs support CORS)
+  if (!useProxy) {
+    try {
+      const res = await fetch(url, { method: "GET" });
+      if (res.ok) {
+        return {
+          text: await res.text(),
+          etag: res.headers.get("etag"),
+          lastModified: res.headers.get("last-modified"),
+          contentType: res.headers.get("content-type")
+        };
+      }
+    } catch (directError) {
+      // CORS error or network error - try proxy if available
+      console.log('Direct fetch failed, trying proxy:', directError.message);
+    }
+  }
 
-  // Use proxy for healthcare.gov and other restricted domains
-  if (useProxy || needsProxy(url)) {
-    fetchUrl = `${PROXY_URL}/api/proxy/csv`;
-    options = {
+  // Try proxy if direct fetch failed or useProxy=true
+  try {
+    const fetchUrl = `${PROXY_URL}/api/proxy/csv`;
+    const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url })
     };
-  }
-
-  const res = await fetch(fetchUrl, options);
-  
-  if (!res.ok) {
-    let errorDetail = {};
-    try {
-      errorDetail = await res.json();
-    } catch (e) {
-      // If response isn't JSON, just use the status text
-      errorDetail = { error: res.statusText };
+    
+    const res = await fetch(fetchUrl, options);
+    
+    if (!res.ok) {
+      let errorDetail = {};
+      try {
+        errorDetail = await res.json();
+      } catch (e) {
+        errorDetail = { error: res.statusText };
+      }
+      const error = new Error(`Proxy fetch failed: ${res.status} ${res.statusText}`);
+      error.detail = errorDetail;
+      error.status = res.status;
+      throw error;
     }
     
-    const error = new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-    error.detail = errorDetail;
-    error.status = res.status;
-    throw error;
+    return {
+      text: await res.text(),
+      etag: res.headers.get("etag"),
+      lastModified: res.headers.get("last-modified"),
+      contentType: res.headers.get("content-type")
+    };
+  } catch (proxyError) {
+    // Both direct and proxy failed
+    throw new Error(`Failed to fetch CSV. Try running a local proxy server or ensure the URL is publicly accessible. Original error: ${proxyError.message}`);
   }
-  
-  return {
-    text: await res.text(),
-    etag: res.headers.get("etag"),
-    lastModified: res.headers.get("last-modified"),
-    contentType: res.headers.get("content-type")
-  };
 }
 
 function needsProxy(url) {

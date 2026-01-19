@@ -1,5 +1,39 @@
 import { el, text, button } from "./components.js";
 
+// Pure builder for DKAN SQL examples so tests can validate without DOM
+export function buildDkanSqlExamples(datasetId, schema) {
+  const simpleFieldNames = (schema || []).filter(c => c && typeof c.name === "string" && !c.name.includes(" ")).map(c => c.name);
+  const firstSimpleField = simpleFieldNames.length > 0 ? simpleFieldNames[0] : "field_name";
+
+  // Only working patterns given DKAN limitations
+  const examples = [
+    {
+      title: "Retrieve first 2 rows",
+      url: `https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true`
+    },
+    {
+      title: "Select specific fields (without spaces)",
+      url: simpleFieldNames.length >= 2
+        ? `https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${simpleFieldNames.slice(0, 2).join('%2C%20')}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true`
+        : `https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${firstSimpleField}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true`
+    },
+    {
+      title: "Pagination (rows 500-502)",
+      url: `https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%20OFFSET%20500%5D&show_db_columns=true`
+    },
+    {
+      title: "Sort by a field (ascending)",
+      url: `https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BORDER%20BY%20${firstSimpleField}%20ASC%5D%5BLIMIT%2010%5D&show_db_columns=true`
+    },
+    {
+      title: "Filter by a specific value",
+      url: `https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BWHERE%20${firstSimpleField}%20%3D%20123%5D%5BLIMIT%2010%5D&show_db_columns=true`
+    }
+  ];
+
+  return examples;
+}
+
 function renderSchemaTable(schema) {
   return el("table", { class: "data-dictionary" }, [
     el("caption", {}, [text("Data Dictionary (inferred)")]),
@@ -105,36 +139,10 @@ function renderSqlQueryExamples(url, meta) {
   const match = url.match(/\/views\/([^\/]+)\/rows\.csv/);
   const datasetId = match ? match[1] : "DATASET_UUID";
   
-  // Filter field names: only use fields without spaces (DKAN fails on quoted field names with spaces)
-  const simpleFieldNames = meta.schema.filter(c => !c.name.includes(" ")).map(c => c.name);
-  const firstSimpleField = simpleFieldNames.length > 0 ? simpleFieldNames[0] : "field_name";
-  
-  // Build SQL API query examples with only WORKING patterns
-  // DKAN limitations: No field names with spaces, no COUNT/GROUP BY, no DISTINCT COUNT
-  const queries = [
-    {
-      title: "Retrieve first 2 rows",
-      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
-    },
-    {
-      title: "Select specific fields (without spaces)",
-      curl: simpleFieldNames.length >= 2
-        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${simpleFieldNames.slice(0, 2).join('%2C%20')}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
-        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${firstSimpleField}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
-    },
-    {
-      title: "Pagination (rows 500-502)",
-      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%20OFFSET%20500%5D&show_db_columns=true' -H 'accept: application/json'`
-    },
-    {
-      title: "Sort by a field (ascending)",
-      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BORDER%20BY%20${firstSimpleField}%20ASC%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
-    },
-    {
-      title: "Filter by a specific value",
-      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BWHERE%20${firstSimpleField}%20%3D%20123%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
-    }
-  ];
+  const queries = buildDkanSqlExamples(datasetId, meta.schema).map(ex => ({
+    title: ex.title,
+    curl: `curl -X GET '${ex.url}' -H 'accept: application/json'`
+  }));
 
   return el("section", {}, [
     el("h2", {}, [text("SQL Query Examples (DKAN API)")]),

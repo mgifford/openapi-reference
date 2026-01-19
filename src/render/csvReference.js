@@ -123,12 +123,30 @@ function renderSqlQueryExamples(url, meta) {
     {
       title: "Pagination (rows 500-502)",
       curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%20OFFSET%20500%5D&show_db_columns=true' -H 'accept: application/json'`
+    },
+    {
+      title: "Sort by a field (ascending)",
+      curl: fieldNames.length >= 1
+        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BORDER%20BY%20${fieldNames[0].replace(/ /g, '%20')}%20ASC%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
+        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BORDER%20BY%20field_name%20ASC%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
+    },
+    {
+      title: "Count distinct values",
+      curl: fieldNames.length >= 1
+        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20COUNT%28DISTINCT%20${fieldNames[0].replace(/ /g, '%20')}%29%20FROM%20${datasetId}%5D&show_db_columns=true' -H 'accept: application/json'`
+        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20COUNT%28%2A%29%20FROM%20${datasetId}%5D&show_db_columns=true' -H 'accept: application/json'`
+    },
+    {
+      title: "Group by and count",
+      curl: fieldNames.length >= 1
+        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${fieldNames[0].replace(/ /g, '%20')}%2C%20COUNT%28%2A%29%20FROM%20${datasetId}%5D%5BGROUP%20BY%20${fieldNames[0].replace(/ /g, '%20')}%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
+        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20field_name%2C%20COUNT%28%2A%29%20FROM%20${datasetId}%5D%5BGROUP%20BY%20field_name%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
     }
   ];
 
   return el("section", {}, [
     el("h2", {}, [text("SQL Query Examples (DKAN API)")]),
-    el("p", {}, [text("Healthcare.gov provides direct SQL API access. Copy these curl commands and paste them into your terminal. Requires proper URL encoding (spaces=%20, asterisk=%2A, brackets=%5B%5D).")]),
+    el("p", {}, [text("Healthcare.gov provides direct SQL API access. Copy these curl commands and paste them into your terminal, or paste the URL directly into your browser. Requires proper URL encoding (spaces=%20, asterisk=%2A, brackets=%5B%5D).")]),
     ...queries.map(q => 
       el("div", { class: "prompt-block" }, [
         el("h3", {}, [text(q.title)]),
@@ -188,7 +206,7 @@ export function renderCsvReference({ root, url, meta, datasetTitle }) {
   root.appendChild(renderDataValidationRules(meta.schema));
   root.appendChild(renderExportOptions(meta, url));
 
-  const promptText =
+  const explainPrompt =
 `You are helping a non-technical reader understand a public healthcare dataset.
 
 Dataset source CSV:
@@ -204,14 +222,42 @@ Task:
 4) Warn about limitations or ambiguity you can infer from the fields and examples.
 Do not invent facts not supported by the fields or examples.`;
 
+  const sqlQueryPrompt =
+`You are helping someone write a DKAN datastore SQL query to analyze healthcare data.
+
+Dataset UUID: [DATASET_UUID]
+Available fields and types:
+${meta.schema.map(c => `- ${c.name} (${c.type})`).join("\n")}
+
+The user wants to: [USER_GOAL - replace with your analysis goal]
+
+Write a DKAN SQL query using this syntax:
+- Brackets wrap query parts: [SELECT ...][WHERE ...][ORDER BY ...][LIMIT ...]
+- URL encode the full query: spaces=%20, asterisk=%2A, brackets=%5B%5D
+- Example: https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20[DATASET_UUID]%5D%5BLIMIT%2010%5D&show_db_columns=true
+
+Provide:
+1) The plain SQL query (with brackets) 
+2) The URL-encoded curl command ready to copy-paste
+3) An explanation of what the query does`;
+
   const promptSection = el("section", {}, [
     el("h2", {}, [text("Copyable prompt templates")]),
     el("p", {}, [text("Plain text prompts users can paste into any AI tool. This site does not embed or call AI.")]),
     el("div", { class: "prompt-block" }, [
       el("h3", {}, [text("Explain this dataset")]),
-      el("pre", {}, [text(promptText)]),
+      el("pre", {}, [text(explainPrompt)]),
       button("Copy prompt", async () => {
-        await navigator.clipboard.writeText(promptText);
+        await navigator.clipboard.writeText(explainPrompt);
+        alert("Prompt copied to clipboard");
+      })
+    ]),
+    el("div", { class: "prompt-block" }, [
+      el("h3", {}, [text("Generate SQL query with AI")]),
+      el("p", {}, [text("Replace [USER_GOAL] with your analysis goal, then paste this prompt into any AI tool.")]),
+      el("pre", {}, [text(sqlQueryPrompt)]),
+      button("Copy prompt", async () => {
+        await navigator.clipboard.writeText(sqlQueryPrompt);
         alert("Prompt copied to clipboard");
       })
     ])
@@ -219,3 +265,5 @@ Do not invent facts not supported by the fields or examples.`;
 
   root.appendChild(promptSection);
 }
+
+

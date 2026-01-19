@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test 10 Healthcare.gov Datasets</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .test-item {
+      border: 1px solid #ddd;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .test-item.loading {
+      background: #f0f4ff;
+      border-color: #5048e5;
+    }
+    .test-item.success {
+      background: #d4edda;
+      border-color: #28a745;
+    }
+    .test-item.error {
+      background: #f8d7da;
+      border-color: #dc3545;
+    }
+    .test-item h3 {
+      margin: 0 0 0.5rem 0;
+    }
+    .test-item .url {
+      font-size: 0.85rem;
+      color: #666;
+      word-break: break-all;
+      margin: 0.5rem 0;
+    }
+    .test-item .status {
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+    .test-item .details {
+      font-size: 0.9rem;
+      margin: 0.5rem 0;
+    }
+    .summary {
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 1rem;
+      border: 2px solid #5048e5;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .summary h2 {
+      margin: 0 0 1rem 0;
+    }
+    button {
+      background: #5048e5;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #3d39c2;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="summary">
+    <h2>Healthcare.gov CSV Dataset Test</h2>
+    <p>Testing 10 datasets from data.healthcare.gov to verify CORS support</p>
+    <button id="start-test" onclick="runTests()">Start Tests</button>
+    <div id="summary-stats" style="margin-top: 1rem;"></div>
+  </div>
+
+  <div id="test-results"></div>
+
+  <script type="module">
+    const datasets = [
+      {
+        name: "AB Suspension and Termination List",
+        url: "https://data.healthcare.gov/sites/default/files/uploaded_resources/AB_Termination_List_823.csv"
+      },
+      {
+        name: "AB Registration Completion List",
+        url: "https://data.healthcare.gov/sites/default/files/uploaded_resources/TBL_RCL_295.csv"
+      },
+      {
+        name: "Agent Broker Registration Tracker",
+        url: "https://data.healthcare.gov/sites/default/files/uploaded_resources/AB_Registration_Tracker_1041.csv"
+      },
+      {
+        name: "Issuer Partner Lookup",
+        url: "https://data.healthcare.gov/sites/default/files/uploaded_resources/251230_Issuer_Partner_Lookup.csv"
+      },
+      {
+        name: "Find Local Help",
+        url: "https://data.healthcare.gov/datafile/localhelp/prod/helpers.csv"
+      },
+      {
+        name: "Network PUF - PY2026",
+        url: "https://data.healthcare.gov/datafile/py2026/network_PUF.csv"
+      },
+      {
+        name: "Service Area PUF - PY2026",
+        url: "https://data.healthcare.gov/datafile/py2026/service_area_PUF.csv"
+      },
+      {
+        name: "Rate PUF - PY2026",
+        url: "https://data.healthcare.gov/datafile/py2026/rate_PUF.csv"
+      },
+      {
+        name: "Benefits Cost Sharing PUF - PY2026",
+        url: "https://data.healthcare.gov/datafile/py2026/benefits_cost_sharing_PUF.csv"
+      },
+      {
+        name: "Plan Attributes PUF - PY2026",
+        url: "https://data.healthcare.gov/datafile/py2026/plan_attributes_PUF.csv"
+      }
+    ];
+
+    let results = {
+      total: datasets.length,
+      success: 0,
+      failed: 0,
+      running: 0
+    };
+
+    async function testDataset(dataset, index) {
+      const container = document.getElementById('test-results');
+      const testDiv = document.createElement('div');
+      testDiv.className = 'test-item loading';
+      testDiv.innerHTML = `
+        <h3>${index + 1}. ${dataset.name}</h3>
+        <div class="url">${dataset.url}</div>
+        <div class="status">⏳ Testing...</div>
+        <div class="details"></div>
+      `;
+      container.appendChild(testDiv);
+
+      const startTime = Date.now();
+      
+      try {
+        const response = await fetch(dataset.url, { method: 'HEAD' });
+        const duration = Date.now() - startTime;
+        
+        if (response.ok) {
+          const size = response.headers.get('content-length');
+          const contentType = response.headers.get('content-type');
+          
+          testDiv.className = 'test-item success';
+          testDiv.querySelector('.status').textContent = '✅ SUCCESS';
+          testDiv.querySelector('.details').innerHTML = `
+            <strong>Duration:</strong> ${duration}ms<br>
+            <strong>Size:</strong> ${size ? (parseInt(size) / 1024).toFixed(2) + ' KB' : 'Unknown'}<br>
+            <strong>Content-Type:</strong> ${contentType || 'Unknown'}<br>
+            <strong>CORS:</strong> Supported ✓
+          `;
+          results.success++;
+        } else {
+          throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        }
+      } catch (error) {
+        const duration = Date.now() - startTime;
+        testDiv.className = 'test-item error';
+        testDiv.querySelector('.status').textContent = '❌ FAILED';
+        testDiv.querySelector('.details').innerHTML = `
+          <strong>Duration:</strong> ${duration}ms<br>
+          <strong>Error:</strong> ${error.message}<br>
+          ${error.message.includes('CORS') || error.message.includes('Failed to fetch') 
+            ? '<strong>Note:</strong> May require proxy server for CORS' 
+            : ''}
+        `;
+        results.failed++;
+      } finally {
+        results.running--;
+        updateSummary();
+      }
+    }
+
+    function updateSummary() {
+      const stats = document.getElementById('summary-stats');
+      const completed = results.success + results.failed;
+      const inProgress = results.running;
+      
+      stats.innerHTML = `
+        <strong>Progress:</strong> ${completed}/${results.total} completed
+        ${inProgress > 0 ? `(${inProgress} running)` : ''}<br>
+        <strong>Success:</strong> ${results.success} ✅<br>
+        <strong>Failed:</strong> ${results.failed} ❌
+      `;
+      
+      if (completed === results.total) {
+        const successRate = ((results.success / results.total) * 100).toFixed(0);
+        stats.innerHTML += `<br><br><strong>Success Rate:</strong> ${successRate}%`;
+        
+        if (results.success === results.total) {
+          stats.innerHTML += '<br><br>🎉 All datasets support CORS!';
+        } else if (results.success > 0) {
+          stats.innerHTML += '<br><br>⚠️ Some datasets require proxy server';
+        } else {
+          stats.innerHTML += '<br><br>❌ All datasets require proxy server';
+        }
+      }
+    }
+
+    window.runTests = async function() {
+      document.getElementById('start-test').disabled = true;
+      document.getElementById('test-results').innerHTML = '';
+      results = { total: datasets.length, success: 0, failed: 0, running: datasets.length };
+      updateSummary();
+      
+      // Run all tests in parallel
+      await Promise.all(datasets.map((dataset, index) => testDataset(dataset, index)));
+      
+      document.getElementById('start-test').disabled = false;
+    };
+  </script>
+</body>
+</html>

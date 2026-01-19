@@ -105,20 +105,22 @@ function renderSqlQueryExamples(url, meta) {
   const match = url.match(/\/views\/([^\/]+)\/rows\.csv/);
   const datasetId = match ? match[1] : "DATASET_UUID";
   
-  const fieldNames = meta.schema.slice(0, 3).map(c => c.name);
+  // Filter field names: only use fields without spaces (DKAN fails on quoted field names with spaces)
+  const simpleFieldNames = meta.schema.filter(c => !c.name.includes(" ")).map(c => c.name);
+  const firstSimpleField = simpleFieldNames.length > 0 ? simpleFieldNames[0] : "field_name";
   
-  // Build SQL API query examples with proper URL encoding
-  // Key: Spaces=%20, Asterisk=%2A, Brackets=%5B%5D, show_db_columns=true (not empty)
+  // Build SQL API query examples with only WORKING patterns
+  // DKAN limitations: No field names with spaces, no COUNT/GROUP BY, no DISTINCT COUNT
   const queries = [
     {
       title: "Retrieve first 2 rows",
       curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
     },
     {
-      title: "Select specific columns",
-      curl: fieldNames.length >= 2
-        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${fieldNames.slice(0, 2).map(f => f.replace(/ /g, '%20')).join('%2C%20')}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
-        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20field_name%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
+      title: "Select specific fields (without spaces)",
+      curl: simpleFieldNames.length >= 2
+        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${simpleFieldNames.slice(0, 2).join('%2C%20')}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
+        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${firstSimpleField}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
     },
     {
       title: "Pagination (rows 500-502)",
@@ -126,27 +128,21 @@ function renderSqlQueryExamples(url, meta) {
     },
     {
       title: "Sort by a field (ascending)",
-      curl: fieldNames.length >= 1
-        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BORDER%20BY%20${fieldNames[0].replace(/ /g, '%20')}%20ASC%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
-        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BORDER%20BY%20field_name%20ASC%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
+      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BORDER%20BY%20${firstSimpleField}%20ASC%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
     },
     {
-      title: "Count distinct values",
-      curl: fieldNames.length >= 1
-        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20COUNT%28DISTINCT%20${fieldNames[0].replace(/ /g, '%20')}%29%20FROM%20${datasetId}%5D&show_db_columns=true' -H 'accept: application/json'`
-        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20COUNT%28%2A%29%20FROM%20${datasetId}%5D&show_db_columns=true' -H 'accept: application/json'`
-    },
-    {
-      title: "Group by and count",
-      curl: fieldNames.length >= 1
-        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${fieldNames[0].replace(/ /g, '%20')}%2C%20COUNT%28%2A%29%20FROM%20${datasetId}%5D%5BGROUP%20BY%20${fieldNames[0].replace(/ /g, '%20')}%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
-        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20field_name%2C%20COUNT%28%2A%29%20FROM%20${datasetId}%5D%5BGROUP%20BY%20field_name%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
+      title: "Filter by a specific value",
+      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BWHERE%20${firstSimpleField}%20%3D%20123%5D%5BLIMIT%2010%5D&show_db_columns=true' -H 'accept: application/json'`
     }
   ];
 
   return el("section", {}, [
     el("h2", {}, [text("SQL Query Examples (DKAN API)")]),
-    el("p", {}, [text("Healthcare.gov provides direct SQL API access. Copy these curl commands and paste them into your terminal, or paste the URL directly into your browser. Requires proper URL encoding (spaces=%20, asterisk=%2A, brackets=%5B%5D).")]),
+    el("p", {}, [text("Healthcare.gov DKAN SQL API has strict limitations. These examples use only patterns that work. Replace DATASET_UUID with the actual UUID from your dataset URL.")]),
+    el("p", {}, [
+      el("strong", {}, [text("Important:")]),
+      text(" DKAN does not support field names with spaces, COUNT/GROUP BY, or aggregate functions. Use the Field Search and Export tools above for complex filtering.")
+    ]),
     ...queries.map(q => 
       el("div", { class: "prompt-block" }, [
         el("h3", {}, [text(q.title)]),

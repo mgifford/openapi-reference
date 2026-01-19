@@ -159,6 +159,8 @@
     .mt-05 { margin-top: 0.5rem; }
     .mb-1 { margin-bottom: 1rem; }
     .small-text { font-size: 0.9rem; }
+    .text-center { text-align: center; }
+    .large-pill { font-size: 1.2rem; padding: 1rem 2rem; }
 
     .muted-list {
       margin-left: 1.5rem;
@@ -406,38 +408,24 @@
 
       <!-- Bookmarklet Setup -->
       <section>
-        <h2>🔖 Bookmarklet Setup</h2>
+        <h2>🔖 Bookmarklet Installation</h2>
+
         <div class="success">
-          <strong>✓ How it works:</strong> One-click access from any data portal. Click the bookmark to load CSV data directly into the explorer.
+          <strong>Drag this link to your bookmarks bar:</strong>
         </div>
 
-        <h3 class="subhead">Step 1: Copy or Drag</h3>
-        <div class="instruction-step">
-          Choose your preferred installation method below.
-        </div>
-        <div id="bookmarklet-output"></div>
+        <div id="bookmarklet-output" class="text-center mt-2"></div>
 
-        <h3 class="subhead">Step 2: Create Bookmark</h3>
-        <div class="instruction-step">
-          <strong>Option A: Bookmark Manager (Recommended)</strong>
-          <ol class="compact-list">
-            <li>Right-click the browser's bookmark bar → "Add page..."</li>
-            <li>Name: <strong>CSV Explorer</strong></li>
-            <li>URL: Paste the code from Step 1</li>
-            <li>Save</li>
-          </ol>
-        </div>
-        <div class="instruction-step">
-          <strong>Option B: Drag to Bookmark Bar</strong>
-          <ol class="compact-list">
-            <li>Open browser developer tools (F12)</li>
-            <li>Console tab → paste the bookmarklet code</li>
-            <li>Run: <code>generateBookmarklet()</code></li>
-            <li>Drag the generated link to your bookmark bar</li>
-          </ol>
-        </div>
+        <h3 class="subhead">📋 Manual Installation</h3>
+        <p>If drag-and-drop doesn't work, you can manually create a bookmark:</p>
+        <ol class="compact-list">
+          <li>Right-click your bookmarks bar and select "Add Page" or "New Bookmark"</li>
+          <li>Enter <strong>"CSV Explorer"</strong> as the name</li>
+          <li>Copy and paste the code below as the URL:</li>
+        </ol>
+        <div id="bookmarklet-code-output" class="mt-1"></div>
 
-        <h3 class="subhead">Step 3: Use It</h3>
+        <h3 class="subhead">🔍 How to Use</h3>
         <div class="use-case">
           <h4>Healthcare.gov Datasets</h4>
           <ol>
@@ -614,34 +602,45 @@ User browses, searches, exports (all local)</code></div>
   </div>
 
   <script>
-    // Display bookmarklet code on page load
+    // Display bookmarklet on page load
     document.addEventListener('DOMContentLoaded', () => {
       const basePath = window.location.pathname.includes('/openapi-reference') ? '/openapi-reference' : '';
       const proxyUrl = window.location.origin + basePath;
       const bookmarkletCode = `javascript:(function(){const PROXY_URL="${proxyUrl}";(async()=>{function getHealthcareDatasetId(){const m=window.location.pathname.match(/dataset\\/([a-z0-9\\-]+)/i);return m?m[1]:null}function findCsvUrls(){const links=[...document.querySelectorAll('a[href*=".csv"]')].map(a=>a.href);const scripts=[...document.scripts].map(s=>s.textContent).join(' ');const csvMatches=scripts.match(/https?:[^\\s"'<>]+\\.csv/gi)||[];return[...new Set([...links,...csvMatches])]}const hId=getHealthcareDatasetId();if(hId){return void(window.location.href=PROXY_URL+'/demo/?dataset='+hId+'&domain=healthcare.gov')}const csvUrls=findCsvUrls();if(csvUrls.length===1){return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(csvUrls[0]))}if(csvUrls.length>1){const selected=prompt('Multiple CSVs found. Paste one URL or select first:\\n'+csvUrls.slice(0,5).join('\\n'));return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(selected||csvUrls[0]))}const manualUrl=prompt('No CSVs found. Paste a CSV URL:');manualUrl&&(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(manualUrl))})()})();`;
 
+      // Main draggable link
       const outputDiv = document.getElementById('bookmarklet-output');
-      const safeCode = bookmarkletCode.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       outputDiv.innerHTML = `
-        <div class="mt-2">
-          <h4 class="text-accent mb-1">📌 Bookmarklet</h4>
-          <p class="text-muted">Option A: Copy the code below and create a bookmark with it as the URL.</p>
-          <div class="bookmarklet-code" tabindex="0" role="region" aria-label="Bookmarklet code">${safeCode}</div>
-          <button type="button" onclick="copyToClipboard('${bookmarkletCode.replace(/'/g, "\\'")}');" class="btn-ghost secondary">
-            📋 Copy Code to Clipboard
-          </button>
-          <p class="text-muted mt-1">Option B: Drag this link to your bookmarks bar:</p>
-          <a id="drag-link" href="${bookmarkletCode}" draggable="true" class="pill-link">CSV Explorer</a>
-          <p id="copy-status" class="text-success mt-075"></p>
-        </div>
+        <a href="${bookmarkletCode}" 
+           draggable="true" 
+           class="pill-link large-pill">
+          📊 CSV Explorer
+        </a>
+        <p class="text-muted mt-1">
+          ↑ Drag this link to your bookmarks bar
+        </p>
       `;
+
+      // Code for manual installation
+      const codeOutputDiv = document.getElementById('bookmarklet-code-output');
+      const safeCode = bookmarkletCode.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      codeOutputDiv.innerHTML = `
+        <div class="bookmarklet-code" tabindex="0" role="region" aria-label="Bookmarklet code">${safeCode}</div>
+        <button type="button" onclick="copyBookmarkletCode()" class="btn-ghost secondary mt-075">
+          📋 Copy to Clipboard
+        </button>
+        <p id="copy-status" class="text-success mt-075"></p>
+      `;
+
+      // Store code globally for copy function
+      window.storedBookmarkletCode = bookmarkletCode;
 
       const demoLink = document.getElementById('demo-link');
       if (demoLink) demoLink.href = `${basePath}/demo/`;
     });
 
-    function copyToClipboard(code) {
-      navigator.clipboard.writeText(code).then(() => {
+    function copyBookmarkletCode() {
+      navigator.clipboard.writeText(window.storedBookmarkletCode).then(() => {
         const status = document.getElementById('copy-status');
         status.textContent = '✓ Copied to clipboard!';
         setTimeout(() => { status.textContent = ''; }, 3000);

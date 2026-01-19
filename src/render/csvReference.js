@@ -79,12 +79,18 @@ function renderFieldSearch(schema) {
 
 function renderSampleQueries(schema) {
   const fieldNames = schema.map(c => c.name);
+  const firstField = fieldNames[0] || "field";
+  const secondField = fieldNames[1] || "field";
+  const thirdField = fieldNames[2] || "field";
+  const dateField = schema.find(c => (c.name || "").toLowerCase().includes("date"));
+
   const queries = [
-    `Count records by ${fieldNames[0] || "field"}`,
-    `Filter by ${fieldNames[1] || "field"} = specific value`,
-    `Find null/empty values in any field`,
-    `Group by ${fieldNames[2] || "field"} and count`,
-    `Export subset of fields`
+    `Count records by ${firstField}`,
+    `Filter by ${secondField} = specific value`,
+    `Find null/empty values in ${thirdField} or any field`,
+    `Group by ${thirdField} and count`,
+    `Export subset of fields`,
+    dateField ? `Get 10 most recent records by ${dateField.name}` : `Get 10 most recent records`
   ];
 
   return el("section", {}, [

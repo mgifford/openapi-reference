@@ -128,6 +128,65 @@
       background: #f0f0f0;
     }
 
+    .btn-ghost {
+      border: none;
+      cursor: pointer;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .btn-ghost.secondary {
+      background: #28a745;
+    }
+
+    .subhead {
+      color: #667eea;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .text-muted { color: #666; }
+    .text-accent { color: #667eea; }
+    .text-success { color: #28a745; font-weight: 600; }
+
+    .mt-2 { margin-top: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-075 { margin-top: 0.75rem; }
+    .mt-05 { margin-top: 0.5rem; }
+    .mb-1 { margin-bottom: 1rem; }
+    .small-text { font-size: 0.9rem; }
+
+    .muted-list {
+      margin-left: 1.5rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .compact-list {
+      margin-left: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .pill-link {
+      display: inline-block;
+      padding: 0.6rem 1rem;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .accent-link {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
     .features {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -292,7 +351,7 @@
             <h3>Install Bookmarklet</h3>
             <p>One-click access from healthcare.gov, CDC, and other data portals. Works anywhere with CSV data.</p>
             <div class="button-group">
-              <button onclick="generateBookmarklet()" class="btn" style="cursor: pointer; border: none;">Generate Code</button>
+              <button type="button" onclick="generateBookmarklet()" class="btn-ghost">Generate Code</button>
             </div>
           </div>
         </div>
@@ -310,7 +369,7 @@
           <div class="feature">
             <div class="feature-icon">🔍</div>
             <h4>Field Search</h4>
-            <p>Filter & inspect columns instantly</p>
+            <p>Filter &amp; inspect columns instantly</p>
           </div>
           <div class="feature">
             <div class="feature-icon">✅</div>
@@ -352,19 +411,19 @@
           <strong>✓ How it works:</strong> One-click access from any data portal. Click the bookmark to load CSV data directly into the explorer.
         </div>
 
-        <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem;">Step 1: Generate Code</h3>
+        <h3 class="subhead">Step 1: Generate Code</h3>
         <div class="instruction-step">
           Click the button below to generate the bookmarklet code. Copy the entire code block.
         </div>
-        <button onclick="generateBookmarklet()" style="padding: 0.75rem 1.5rem; background: #667eea; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;">
+        <button type="button" onclick="generateBookmarklet()" class="btn-ghost">
           Generate Bookmarklet Code
         </button>
         <div id="bookmarklet-output"></div>
 
-        <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem;">Step 2: Create Bookmark</h3>
+        <h3 class="subhead">Step 2: Create Bookmark</h3>
         <div class="instruction-step">
           <strong>Option A: Bookmark Manager (Recommended)</strong>
-          <ol style="margin-left: 1rem; margin-top: 0.5rem;">
+          <ol class="compact-list">
             <li>Right-click the browser's bookmark bar → "Add page..."</li>
             <li>Name: <strong>CSV Explorer</strong></li>
             <li>URL: Paste the code from Step 1</li>
@@ -373,7 +432,7 @@
         </div>
         <div class="instruction-step">
           <strong>Option B: Drag to Bookmark Bar</strong>
-          <ol style="margin-left: 1rem; margin-top: 0.5rem;">
+          <ol class="compact-list">
             <li>Open browser developer tools (F12)</li>
             <li>Console tab → paste the bookmarklet code</li>
             <li>Run: <code>generateBookmarklet()</code></li>
@@ -381,7 +440,7 @@
           </ol>
         </div>
 
-        <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem;">Step 3: Use It</h3>
+        <h3 class="subhead">Step 3: Use It</h3>
         <div class="use-case">
           <h4>Healthcare.gov Datasets</h4>
           <ol>
@@ -404,7 +463,7 @@
       <!-- Use Cases -->
       <section>
         <h2>💡 Use Cases</h2>
-        
+
         <div class="use-case">
           <h4>1. Explore Healthcare.gov Data</h4>
           <p>Find datasets on healthcare.gov, click the bookmark, and instantly see the data dictionary with field definitions, validation rules, and sample values.</p>
@@ -439,7 +498,7 @@
 
         <div class="api-endpoint">
           <span class="method">POST</span> <code>/api/proxy/csv</code>
-          <p style="margin-top: 0.5rem; color: #666;">Fetch any CSV file with CORS handling. Returns raw CSV data.</p>
+          <p class="text-muted mt-05">Fetch any CSV file with CORS handling. Returns raw CSV data.</p>
           <div class="code-block"><code>curl -X POST http://localhost:3000/api/proxy/csv \
   -H "Content-Type: application/json" \
   -d '{"url":"https://example.com/data.csv"}'</code></div>
@@ -447,15 +506,15 @@
 
         <div class="api-endpoint">
           <span class="method">GET</span> <code>/api/healthcare/dataset/:id</code>
-          <p style="margin-top: 0.5rem; color: #666;">Extract CSV URLs and metadata from healthcare.gov datasets.</p>
+          <p class="text-muted mt-05">Extract CSV URLs and metadata from healthcare.gov datasets.</p>
           <div class="code-block"><code>curl http://localhost:3000/api/healthcare/dataset/5k5i-wzex</code></div>
-          <p style="color: #666; margin-top: 0.5rem;"><strong>Returns:</strong> JSON with dataset title and CSV URLs</p>
+          <p class="text-muted mt-05"><strong>Returns:</strong> JSON with dataset title and CSV URLs</p>
         </div>
 
         <div class="api-endpoint">
           <span class="method">GET</span> <code>/api/socrata</code>
-          <p style="margin-top: 0.5rem; color: #666;">Query Socrata data portals (CDC, CMS, etc.) for dataset metadata.</p>
-          <div class="code-block"><code>curl "http://localhost:3000/api/socrata?domain=data.cdc.gov&id=dataset-id"</code></div>
+          <p class="text-muted mt-05">Query Socrata data portals (CDC, CMS, etc.) for dataset metadata.</p>
+          <div class="code-block"><code>curl "http://localhost:3000/api/socrata?domain=data.cdc.gov&amp;id=dataset-id"</code></div>
         </div>
       </section>
 
@@ -463,7 +522,7 @@
       <section>
         <h2>🌐 Supported Data Portals</h2>
         <p>The proxy server handles CORS restrictions for these whitelisted domains:</p>
-        <ul style="margin-left: 1.5rem; color: #666;">
+        <ul class="muted-list">
           <li><strong>healthcare.gov</strong> - Health datasets</li>
           <li><strong>cdc.gov</strong> - Disease and health statistics</li>
           <li><strong>cms.gov</strong> - Medicare/Medicaid data</li>
@@ -488,7 +547,7 @@ User clicks bookmark on healthcare.gov
         ↓
 Bookmarklet extracts dataset ID
         ↓
-App opens with ?dataset=ID&domain=healthcare.gov
+App opens with ?dataset=ID&amp;domain=healthcare.gov
         ↓
 Server fetches metadata and CSV URLs
         ↓
@@ -501,8 +560,8 @@ User browses, searches, exports (all local)</code></div>
 
       <!-- Security -->
       <section>
-        <h2>🔒 Security & Privacy</h2>
-        <ul style="margin-left: 1.5rem; color: #666; margin-bottom: 1rem;">
+        <h2>🔒 Security &amp; Privacy</h2>
+        <ul class="muted-list">
           <li>✅ <strong>No data storage</strong> - Server is stateless, doesn't store any data</li>
           <li>✅ <strong>Client-side caching</strong> - Data stays in your browser (IndexedDB)</li>
           <li>✅ <strong>Domain whitelisting</strong> - Only trusted sources allowed through proxy</li>
@@ -523,7 +582,7 @@ User browses, searches, exports (all local)</code></div>
         <div class="use-case">
           <h4>CSV not loading</h4>
           <p>Check browser console (F12 → Console). Common issues:</p>
-          <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+          <ul class="compact-list">
             <li>Domain not whitelisted (edit <code>server.js</code>)</li>
             <li>URL is a dataset page, not a direct CSV file</li>
             <li>CSV requires authentication</li>
@@ -540,8 +599,8 @@ User browses, searches, exports (all local)</code></div>
       <!-- Getting Started -->
       <section>
         <h2>📚 Next Steps</h2>
-        <ol style="margin-left: 1.5rem; color: #666; margin-bottom: 1rem;">
-          <li><strong>Try the demo:</strong> <a href="/demo/" style="color: #667eea; text-decoration: none;">Open demo</a></li>
+        <ol class="muted-list">
+          <li><strong>Try the demo:</strong> <a href="/demo/" class="accent-link">Open demo</a></li>
           <li><strong>Install bookmarklet:</strong> Generate code above and add to your browser</li>
           <li><strong>Test with healthcare.gov:</strong> Visit <code>https://data.healthcare.gov/dataset/5k5i-wzex</code> and click the bookmark</li>
           <li><strong>Deploy to production:</strong> See SERVER_DEPLOYMENT.md in the project repo</li>
@@ -551,7 +610,7 @@ User browses, searches, exports (all local)</code></div>
 
     <footer>
       <p>CSV Dataset Explorer • Lightweight • Accessible • Zero Dependencies</p>
-      <p style="font-size: 0.9rem; margin-top: 1rem; color: #999;">
+      <p class="text-muted small-text mt-1">
         Built with vanilla JavaScript, IndexedDB, and Express.js
       </p>
     </footer>
@@ -566,16 +625,16 @@ User browses, searches, exports (all local)</code></div>
       const outputDiv = document.getElementById('bookmarklet-output');
       const safeCode = bookmarkletCode.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       outputDiv.innerHTML = `
-        <div style="margin-top: 2rem;">
-          <h4 style="color: #667eea; margin-bottom: 1rem;">✓ Bookmarklet Code Generated</h4>
-          <p style="color: #666; margin-bottom: 0.5rem;">Option A: Copy the code below and create a bookmark with it as the URL.</p>
+        <div class="mt-2">
+          <h4 class="text-accent mb-1">✓ Bookmarklet Code Generated</h4>
+          <p class="text-muted">Option A: Copy the code below and create a bookmark with it as the URL.</p>
           <div class="bookmarklet-code">${safeCode}</div>
-          <button onclick="copyToClipboard()" style="padding: 0.75rem 1.5rem; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 0.75rem;">
+          <button type="button" onclick="copyToClipboard()" class="btn-ghost secondary">
             📋 Copy Code to Clipboard
           </button>
-          <p style="color: #666; margin: 1rem 0 0.5rem;">Option B: Drag this link to your bookmarks bar:</p>
-          <a id="drag-link" href="${bookmarkletCode}" style="display: inline-block; padding: 0.6rem 1rem; background: #667eea; color: white; border-radius: 6px; text-decoration: none; font-weight: 600;">CSV Explorer</a>
-          <p id="copy-status" style="margin-top: 0.75rem; color: #28a745; font-weight: 600;"></p>
+          <p class="text-muted mt-1">Option B: Drag this link to your bookmarks bar:</p>
+          <a id="drag-link" href="${bookmarkletCode}" class="pill-link">CSV Explorer</a>
+          <p id="copy-status" class="text-success mt-075"></p>
         </div>
       `;
 

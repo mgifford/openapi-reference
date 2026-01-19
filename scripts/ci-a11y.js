@@ -4,8 +4,8 @@
  * Uses Playwright + axe-core to scan pages for accessibility violations
  */
 
-const { chromium } = require('playwright');
-const AxeBuilder = require('@axe-core/playwright').default;
+import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
 
 const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:3000';
 

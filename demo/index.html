@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CSV Dataset Explorer</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    import { mountDatasetExplorer } from "../src/index.js";
+    mountDatasetExplorer({
+      root: "#app",
+      defaultCsvUrl: "https://data.healthcare.gov/sites/default/files/uploaded_resources/AB_Termination_List_823.csv"
+    });
+  </script>
+</body>
+</html>

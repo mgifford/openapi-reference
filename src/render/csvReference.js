@@ -108,12 +108,12 @@ function renderSqlQueryExamples(url, meta) {
   const fieldNames = meta.schema.slice(0, 3).map(c => c.name);
   
   // Build example queries using DKAN datastore SQL API syntax
-  // Note: Square brackets must be URL-encoded in curl commands (%5B = [, %5D = ])
+  // Note: All special characters must be URL-encoded (%5B = [, %5D = ], %26 = &)
   const queries = [
     {
       title: "Retrieve first row with column names",
       sql: `SELECT * FROM ${datasetId} LIMIT 1 OFFSET 0`,
-      curl: `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT * FROM ${datasetId}%5D%5BLIMIT 1 OFFSET 0%5D&show_db_columns"`
+      curl: `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT * FROM ${datasetId}%5D%5BLIMIT 1 OFFSET 0%5D%26show_db_columns"`
     },
     {
       title: "Select specific columns with filtering",
@@ -121,13 +121,13 @@ function renderSqlQueryExamples(url, meta) {
         ? `SELECT ${fieldNames.slice(0, 2).join(", ")} FROM ${datasetId} WHERE ${fieldNames[0]} = "value"`
         : `SELECT * FROM ${datasetId} WHERE field_name = "value"`,
       curl: fieldNames.length >= 2
-        ? `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT ${fieldNames.slice(0, 2).join(", ")} FROM ${datasetId}%5D%5BWHERE ${fieldNames[0]} = \\"value\\"%5D&show_db_columns"`
-        : `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT * FROM ${datasetId}%5D%5BWHERE field_name = \\"value\\"%5D&show_db_columns"`
+        ? `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT ${fieldNames.slice(0, 2).join(", ")} FROM ${datasetId}%5D%5BWHERE ${fieldNames[0]} = \\"value\\"%5D%26show_db_columns"`
+        : `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT * FROM ${datasetId}%5D%5BWHERE field_name = \\"value\\"%5D%26show_db_columns"`
     },
     {
       title: "Pagination (skip first 500 rows, get next 500)",
       sql: `SELECT * FROM ${datasetId} LIMIT 500 OFFSET 500`,
-      curl: `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT * FROM ${datasetId}%5D%5BLIMIT 500 OFFSET 500%5D&show_db_columns"`
+      curl: `curl "https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT * FROM ${datasetId}%5D%5BLIMIT 500 OFFSET 500%5D%26show_db_columns"`
     }
   ];
 

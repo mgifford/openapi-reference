@@ -138,6 +138,14 @@ function renderSqlQueryExamples(url, meta) {
   // Format: https://data.healthcare.gov/api/views/{id}/rows.csv?accessType=DOWNLOAD
   const match = url.match(/\/views\/([^\/]+)\/rows\.csv/);
   const datasetId = match ? match[1] : "DATASET_UUID";
+
+  // If we cannot derive a dataset UUID, do not show broken examples
+  if (datasetId === "DATASET_UUID") {
+    return el("section", {}, [
+      el("h2", {}, [text("SQL Query Examples (DKAN API)")]),
+      el("p", {}, [text("No DKAN dataset identifier was found for this CSV URL. DKAN SQL examples are hidden to avoid broken links. If you know the dataset UUID, enter it manually or use the Field Search and Export tools above.")])
+    ]);
+  }
   
   const queries = buildDkanSqlExamples(datasetId, meta.schema).map(ex => ({
     title: ex.title,

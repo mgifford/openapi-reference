@@ -19,7 +19,8 @@ function renderCachedDatasets(cachedUrls, onLoadDataset) {
 
 async function fetchHealthcareDataset(datasetId) {
   try {
-    // First, try using healthcare.gov's Socrata API directly (works for Socrata IDs like 5k5i-wzex)
+    // First, try using healthcare.gov's DKAN API directly (CKAN-compatible API)
+    // Works for both Socrata-style IDs (5k5i-wzex) and UUID format (477ffb11-...)
     const apiUrl = `https://data.healthcare.gov/api/3/action/package_show?id=${datasetId}`;
     
     try {
@@ -43,8 +44,8 @@ async function fetchHealthcareDataset(datasetId) {
         }
       }
     } catch (apiError) {
-      // API might not support this ID format, try HTML parsing for UUID format
-      console.log('Socrata API call failed, trying HTML parsing for UUID format:', apiError.message);
+      // DKAN API might not support this ID format, try HTML parsing as fallback
+      console.log('DKAN API call failed, trying HTML parsing fallback:', apiError.message);
     }
 
     // Fallback: Parse the dataset page HTML for download links (works for UUID format)

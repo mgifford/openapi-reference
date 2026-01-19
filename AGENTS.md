@@ -42,8 +42,9 @@ It is intentionally:
 - **CSV Processing**: Parse and infer schema from CSV files
 - **Data Storage**: IndexedDB for local caching (no server storage)
 - **Healthcare.gov Integration**: 
-  - Socrata API for datasets with Socrata IDs (`5k5i-wzex`)
-  - HTML parsing fallback for UUID-format datasets (`477ffb11-...`)
+  - DKAN API (CKAN-compatible) for dataset metadata
+  - Supports both Socrata-style IDs (`5k5i-wzex`) and UUID format (`477ffb11-...`)
+  - HTML parsing fallback when API is unavailable
 - **Bookmarklet**: Drag-and-drop installation for one-click access
 - **CORS Handling**: Try direct fetch first, use proxy only if needed
 

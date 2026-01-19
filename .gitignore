@@ -5,5 +5,14 @@ node_modules/
 dist/
 build/
 *.log
+.npmrc
+coverage/
+playwright-report/
+test-results/
+/tmp/
 .vscode/
 .idea/
+
+package-lock.backup*
+*.tmp
+*.swp

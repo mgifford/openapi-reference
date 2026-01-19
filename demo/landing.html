@@ -285,7 +285,7 @@
             <h3>Try the Demo</h3>
             <p>Load and explore CSV files with an interactive data dictionary, validation rules, and AI prompts.</p>
             <div class="button-group">
-              <a href="/demo/" class="btn">Open Demo</a>
+              <a id="demo-link" href="/demo/" class="btn">Open Demo</a>
             </div>
           </div>
           <div class="card">
@@ -484,43 +484,48 @@
 ├─ Bookmarklet             ├─ Healthcare.gov extractor
 └─ Vanilla JavaScript      └─ Socrata API gateway
 
-User clicks bookmark on healthcare.gov
-        ↓
-Bookmarklet extracts dataset ID
-        ↓
-App opens with ?dataset=ID&domain=healthcare.gov
-        ↓
-Server fetches metadata and CSV URLs
-        ↓
-Browser parses CSV, infers schema
-        ↓
-Data cached locally in IndexedDB (browser only)
-        ↓
-User browses, searches, exports (all local)</code></div>
-      </section>
+      function generateBookmarklet() {
+        const basePath = window.location.pathname.includes('/openapi-reference') ? '/openapi-reference' : '';
+        const proxyUrl = window.location.origin + basePath;
+        const bookmarkletCode = `javascript:(function(){const PROXY_URL="${proxyUrl}";(async()=>{function getHealthcareDatasetId(){const m=window.location.pathname.match(/dataset\\/([a-z0-9\\-]+)/i);return m?m[1]:null}function findCsvUrls(){const links=[...document.querySelectorAll('a[href*=".csv"]')].map(a=>a.href);const scripts=[...document.scripts].map(s=>s.textContent).join(' ');const csvMatches=scripts.match(/https?:[^\\s"'<>]+\\.csv/gi)||[];return[...new Set([...links,...csvMatches])]}const hId=getHealthcareDatasetId();if(hId){return void(window.location.href=PROXY_URL+'/demo/?dataset='+hId+'&domain=healthcare.gov')}const csvUrls=findCsvUrls();if(csvUrls.length===1){return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(csvUrls[0]))}if(csvUrls.length>1){const selected=prompt('Multiple CSVs found. Paste one URL or select first:\\n'+csvUrls.slice(0,5).join('\\n'));return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(selected||csvUrls[0]))}const manualUrl=prompt('No CSVs found. Paste a CSV URL:');manualUrl&&(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(manualUrl))})()})();`;
 
-      <!-- Security -->
-      <section>
-        <h2>🔒 Security & Privacy</h2>
-        <ul style="margin-left: 1.5rem; color: #666; margin-bottom: 1rem;">
-          <li>✅ <strong>No data storage</strong> - Server is stateless, doesn't store any data</li>
-          <li>✅ <strong>Client-side caching</strong> - Data stays in your browser (IndexedDB)</li>
-          <li>✅ <strong>Domain whitelisting</strong> - Only trusted sources allowed through proxy</li>
-          <li>✅ <strong>URL validation</strong> - Unsafe URLs rejected before fetching</li>
-          <li>✅ <strong>HTTPS ready</strong> - Works with HTTPS in production</li>
-        </ul>
-      </section>
+        const outputDiv = document.getElementById('bookmarklet-output');
+        const safeCode = bookmarkletCode.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        outputDiv.innerHTML = `
+          <div style="margin-top: 2rem;">
+            <h4 style="color: #667eea; margin-bottom: 1rem;">✓ Bookmarklet Code Generated</h4>
+            <p style="color: #666; margin-bottom: 0.5rem;">Option A: Copy the code below and create a bookmark with it as the URL.</p>
+            <div class="bookmarklet-code">${safeCode}</div>
+            <button onclick="copyToClipboard()" style="padding: 0.75rem 1.5rem; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 0.75rem;">
+              📋 Copy Code to Clipboard
+            </button>
+            <p style="color: #666; margin: 1rem 0 0.5rem;">Option B: Drag this link to your bookmarks bar:</p>
+            <a id="drag-link" href="${bookmarkletCode}" style="display: inline-block; padding: 0.6rem 1rem; background: #667eea; color: white; border-radius: 6px; text-decoration: none; font-weight: 600;">CSV Explorer</a>
+            <p id="copy-status" style="margin-top: 0.75rem; color: #28a745; font-weight: 600;"></p>
+          </div>
+        `;
 
-      <!-- Troubleshooting -->
-      <section>
-        <h2>❓ Troubleshooting</h2>
+        // Store for copy button
+        window.bookmarkletCode = bookmarkletCode;
+      }
 
-        <div class="use-case">
-          <h4>Bookmarklet not working</h4>
-          <p>Ensure the server is running on <code>http://localhost:3000</code> and the bookmarklet code includes the correct <code>PROXY_URL</code>.</p>
-        </div>
+      function copyToClipboard() {
+        const code = window.bookmarkletCode;
+        navigator.clipboard.writeText(code).then(() => {
+          const status = document.getElementById('copy-status');
+          status.textContent = '✓ Copied to clipboard!';
+          setTimeout(() => { status.textContent = ''; }, 3000);
+        }).catch(err => {
+          alert('Failed to copy: ' + err);
+        });
+      }
 
-        <div class="use-case">
+      // Adjust demo link for GitHub Pages base path
+      document.addEventListener('DOMContentLoaded', () => {
+        const basePath = window.location.pathname.includes('/openapi-reference') ? '/openapi-reference' : '';
+        const demoLink = document.getElementById('demo-link');
+        if (demoLink) demoLink.href = `${basePath}/demo/`;
+      });
           <h4>CSV not loading</h4>
           <p>Check browser console (F12 → Console). Common issues:</p>
           <ul style="margin-left: 1rem; margin-top: 0.5rem;">

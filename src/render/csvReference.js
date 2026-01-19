@@ -223,31 +223,32 @@ Do not invent facts not supported by the fields or examples.`;
 
 Dataset UUID: [DATASET_UUID]
 Available fields and types:
-${meta.schema.map(c => `- ${c.name} (${c.type})`).join("\n")}
+  ${meta.schema.map(c => `- ${c.name} (${c.type})`).join("\n")}
+  
 
 The user wants to: [USER_GOAL - replace with your analysis goal]
 
-DKAN SQL Query Rules (IMPORTANT - these are strict):
-1. Field names with spaces MUST be wrapped in double quotes, but DKAN often fails on complex queries with quoted names
-2. Keep queries simple: SELECT, WHERE, LIMIT, ORDER BY, DISTINCT
-3. Syntax: each clause goes in separate brackets like [SELECT ...][WHERE ...][LIMIT ...]
-4. URL encoding: spaces=%20, asterisk=%2A, brackets=%5B%5D, quotes=%22, parentheses=%28%29, commas=%2C
-5. Test with simple SELECT first, then add complexity
+  ⚠️ DKAN LIMITATIONS (why complex queries fail):
+  - Field names with spaces CANNOT be queried (WHERE, ORDER BY always fail)
+  - Aggregate functions (COUNT, GROUP BY, DISTINCT COUNT) do not work
+  - Complex queries consistently return "Invalid query string"
+  - Most WHERE clauses fail with quoted field names
+  
+  ✅ RECOMMENDED: Use the Field Search tool in this explorer instead of DKAN SQL
+  - It's faster and more reliable for filtering this dataset
+  - Or: Export the data and filter locally in Excel/Python/R
 
 Example working query:
 [SELECT * FROM [DATASET_UUID]][LIMIT 10]
 
-If your generated query fails with "Invalid query string", try:
-- Remove quoted field names (use unquoted if possible)
-- Simplify the WHERE clause
-- Remove aggregate functions (COUNT, GROUP BY)
-- Use LIMIT to test before filtering
+  Simple browser-friendly test link (just paste in your browser):
+  https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20[DATASET_UUID]%5D%5BLIMIT%20100%5D&show_db_columns=true
 
 Provide:
-1) The plain SQL query (with brackets) 
-2) The URL-encoded curl command ready to copy-paste
-3) An explanation of what the query does
-4) If field names have spaces, note that DKAN may reject them - suggest manual filtering instead`;
+  1) An explanation of why DKAN queries fail on this dataset
+  2) A simple test query URL they can paste directly in their browser
+  3) A recommendation to use the Field Search tool above for filtering
+  4) If they need complex analysis: guide them to export and use Excel/Python/R instead`;
 
   const promptSection = el("section", {}, [
     el("h2", {}, [text("Copyable prompt templates")]),

@@ -44,38 +44,45 @@ async function fetchHealthcareDataset(datasetId) {
       }
     } catch (apiError) {
       // API might not support this ID format, try HTML parsing for UUID format
-      console.log('Socrata API call failed, trying HTML parsing for UUID format');
+      console.log('Socrata API call failed, trying HTML parsing for UUID format:', apiError.message);
     }
 
     // Fallback: Parse the dataset page HTML for download links (works for UUID format)
     const pageUrl = `https://data.healthcare.gov/dataset/${datasetId}`;
-    const pageResponse = await fetch(pageUrl);
-    if (!pageResponse.ok) {
-      throw new Error(`Dataset page returned ${pageResponse.status}`);
-    }
-
-    const html = await pageResponse.text();
     
-    // Extract title from HTML
-    let title = 'Dataset';
-    const titleMatch = html.match(/<h1[^>]*class="[^"]*heading[^"]*"[^>]*>([^<]+)<\/h1>/i);
-    if (titleMatch) {
-      title = titleMatch[1].trim();
-    }
+    try {
+      const pageResponse = await fetch(pageUrl);
+      if (!pageResponse.ok) {
+        throw new Error(`Dataset page returned ${pageResponse.status}`);
+      }
 
-    // Look for CSV download links in the HTML
-    const csvMatches = html.match(/href="([^"]*\.csv)"/gi);
-    if (csvMatches && csvMatches.length > 0) {
-      // Extract the first CSV URL
-      const csvUrl = csvMatches[0].replace('href="', '').replace('"', '');
-      // Make it absolute if needed
-      const absoluteUrl = csvUrl.startsWith('http') ? csvUrl : `https://data.healthcare.gov${csvUrl}`;
+      const html = await pageResponse.text();
       
-      return {
-        url: absoluteUrl,
-        title: title,
-        description: ''
-      };
+      // Extract title from HTML
+      let title = 'Dataset';
+      const titleMatch = html.match(/<h1[^>]*class="[^"]*heading[^"]*"[^>]*>([^<]+)<\/h1>/i);
+      if (titleMatch) {
+        title = titleMatch[1].trim();
+      }
+
+      // Look for CSV download links in the HTML
+      const csvMatches = html.match(/href="([^"]*\.csv)"/gi);
+      if (csvMatches && csvMatches.length > 0) {
+        // Extract the first CSV URL
+        const csvUrl = csvMatches[0].replace('href="', '').replace('"', '');
+        // Make it absolute if needed
+        const absoluteUrl = csvUrl.startsWith('http') ? csvUrl : `https://data.healthcare.gov${csvUrl}`;
+        
+        return {
+          url: absoluteUrl,
+          title: title,
+          description: ''
+        };
+      }
+    } catch (htmlError) {
+      // HTML parsing failed, possibly due to CORS. Try constructing URL from common patterns.
+      console.log('HTML parsing failed:', htmlError.message);
+      throw new Error(`Unable to fetch dataset metadata. The dataset page may require a proxy server or the dataset ID may be invalid.`);
     }
     
     throw new Error('No CSV found in dataset page');

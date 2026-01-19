@@ -19,32 +19,66 @@ function renderCachedDatasets(cachedUrls, onLoadDataset) {
 
 async function fetchHealthcareDataset(datasetId) {
   try {
-    // Try using healthcare.gov's Socrata API directly
+    // First, try using healthcare.gov's Socrata API directly (works for Socrata IDs like 5k5i-wzex)
     const apiUrl = `https://data.healthcare.gov/api/3/action/package_show?id=${datasetId}`;
     
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Extract CSV URLs from resources
-    if (data.result && data.result.resources) {
-      const csvResources = data.result.resources.filter(r => 
-        r.url && (r.url.endsWith('.csv') || r.format?.toLowerCase() === 'csv')
-      );
-      
-      if (csvResources.length > 0) {
-        return {
-          url: csvResources[0].url,
-          title: data.result.title || data.result.name || 'Dataset',
-          description: data.result.notes || ''
-        };
+    try {
+      const response = await fetch(apiUrl);
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Extract CSV URLs from resources
+        if (data.result && data.result.resources) {
+          const csvResources = data.result.resources.filter(r => 
+            r.url && (r.url.endsWith('.csv') || r.format?.toLowerCase() === 'csv')
+          );
+          
+          if (csvResources.length > 0) {
+            return {
+              url: csvResources[0].url,
+              title: data.result.title || data.result.name || 'Dataset',
+              description: data.result.notes || ''
+            };
+          }
+        }
       }
+    } catch (apiError) {
+      // API might not support this ID format, try HTML parsing for UUID format
+      console.log('Socrata API call failed, trying HTML parsing for UUID format');
+    }
+
+    // Fallback: Parse the dataset page HTML for download links (works for UUID format)
+    const pageUrl = `https://data.healthcare.gov/dataset/${datasetId}`;
+    const pageResponse = await fetch(pageUrl);
+    if (!pageResponse.ok) {
+      throw new Error(`Dataset page returned ${pageResponse.status}`);
+    }
+
+    const html = await pageResponse.text();
+    
+    // Extract title from HTML
+    let title = 'Dataset';
+    const titleMatch = html.match(/<h1[^>]*class="[^"]*heading[^"]*"[^>]*>([^<]+)<\/h1>/i);
+    if (titleMatch) {
+      title = titleMatch[1].trim();
+    }
+
+    // Look for CSV download links in the HTML
+    const csvMatches = html.match(/href="([^"]*\.csv)"/gi);
+    if (csvMatches && csvMatches.length > 0) {
+      // Extract the first CSV URL
+      const csvUrl = csvMatches[0].replace('href="', '').replace('"', '');
+      // Make it absolute if needed
+      const absoluteUrl = csvUrl.startsWith('http') ? csvUrl : `https://data.healthcare.gov${csvUrl}`;
+      
+      return {
+        url: absoluteUrl,
+        title: title,
+        description: ''
+      };
     }
     
-    throw new Error('No CSV found for this dataset');
+    throw new Error('No CSV found in dataset page');
   } catch (err) {
     console.error('Failed to fetch healthcare.gov dataset:', err);
     throw err;

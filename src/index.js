@@ -18,20 +18,31 @@ function renderCachedDatasets(cachedUrls, onLoadDataset) {
 }
 
 async function fetchHealthcareDataset(datasetId) {
-  const basePath = window.location.pathname.includes('/openapi-reference') ? '/openapi-reference' : '';
-  const proxyUrl = window.location.origin + basePath;
-  const metaUrl = `${proxyUrl}/api/healthcare/dataset/${datasetId}`;
-  
   try {
-    const response = await fetch(metaUrl);
-    const metadata = await response.json();
+    // Try using healthcare.gov's Socrata API directly
+    const apiUrl = `https://data.healthcare.gov/api/3/action/package_show?id=${datasetId}`;
     
-    if (metadata.csvUrls && metadata.csvUrls.length > 0) {
-      return metadata.csvUrls[0]; // Return first CSV found
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error(`API returned ${response.status}`);
     }
+    
+    const data = await response.json();
+    
+    // Extract CSV URLs from resources
+    if (data.result && data.result.resources) {
+      const csvResources = data.result.resources.filter(r => 
+        r.url && (r.url.endsWith('.csv') || r.format?.toLowerCase() === 'csv')
+      );
+      
+      if (csvResources.length > 0) {
+        return csvResources[0].url;
+      }
+    }
+    
     throw new Error('No CSV found for this dataset');
   } catch (err) {
-    console.error('Failed to fetch healthcare.gov metadata:', err);
+    console.error('Failed to fetch healthcare.gov dataset:', err);
     throw err;
   }
 }

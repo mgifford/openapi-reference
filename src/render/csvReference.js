@@ -107,59 +107,47 @@ function renderSqlQueryExamples(url, meta) {
   
   const fieldNames = meta.schema.slice(0, 3).map(c => c.name);
   
-  // Build example queries using DKAN datastore SQL API syntax
-  // Use curl's --data-urlencode flag to handle special characters automatically
-  const queries = [
+  // Provide simple query examples using local filtering and curl for downloads
+  const examples = [
     {
-      title: "Retrieve first row with column names",
-      sql: `SELECT * FROM ${datasetId} LIMIT 1 OFFSET 0`,
-      curl: `curl -G "https://data.healthcare.gov/api/1/datastore/sql" --data-urlencode "query=[SELECT * FROM ${datasetId}][LIMIT 1 OFFSET 0]" --data-urlencode "show_db_columns="`
+      title: "Filter by a specific field (local filtering)",
+      description: `Search in the loaded dataset for records where ${fieldNames[0] || "field_name"} matches your criteria using the Field Search tool above.`,
+      code: `Open the Field Search tool above and search within the ${fieldNames[0] || "field"} column.`
     },
     {
-      title: "Select specific columns with filtering",
-      sql: fieldNames.length >= 2 
-        ? `SELECT ${fieldNames.slice(0, 2).join(", ")} FROM ${datasetId} WHERE ${fieldNames[0]} = "value"`
-        : `SELECT * FROM ${datasetId} WHERE field_name = "value"`,
-      curl: fieldNames.length >= 2
-        ? `curl -G "https://data.healthcare.gov/api/1/datastore/sql" --data-urlencode "query=[SELECT ${fieldNames.slice(0, 2).join(", ")} FROM ${datasetId}][WHERE ${fieldNames[0]} = \\"value\\"]" --data-urlencode "show_db_columns="`
-        : `curl -G "https://data.healthcare.gov/api/1/datastore/sql" --data-urlencode "query=[SELECT * FROM ${datasetId}][WHERE field_name = \\"value\\"]" --data-urlencode "show_db_columns="`
+      title: "Download full dataset for analysis",
+      description: "Export all records as JSON or CSV for further analysis in Excel, Python, R, or other tools.",
+      code: `Click "Export Records" below to save the full dataset locally.`
     },
     {
-      title: "Pagination (skip first 500 rows, get next 500)",
-      sql: `SELECT * FROM ${datasetId} LIMIT 500 OFFSET 500`,
-      curl: `curl -G "https://data.healthcare.gov/api/1/datastore/sql" --data-urlencode "query=[SELECT * FROM ${datasetId}][LIMIT 500 OFFSET 500]" --data-urlencode "show_db_columns="`
+      title: "Paginate through large datasets",
+      description: "This tool automatically caches data locally. Scroll down to load more rows as needed.",
+      code: `The Data Dictionary shows total row count (cached). Scroll to view additional records.`
     }
   ];
 
   return el("section", {}, [
-    el("h2", {}, [text("SQL Query Examples (DKAN API)")]),
-    el("p", {}, [text("Healthcare.gov uses the DKAN datastore SQL API. Copy these examples and use them with curl, your browser, or other tools. Replace \"value\" with your filter criteria.")]),
-    ...queries.map(q => 
+    el("h2", {}, [text("Query & Filter Examples")]),
+    el("p", {}, [text("This tool provides client-side filtering and export for working with healthcare.gov datasets. For advanced analysis, export the data and use tools like Excel, curl, or Python.")]),
+    ...examples.map(ex => 
       el("div", { class: "prompt-block" }, [
-        el("h3", {}, [text(q.title)]),
+        el("h3", {}, [text(ex.title)]),
+        el("p", {}, [text(ex.description)]),
         el("p", {}, [
-          el("strong", {}, [text("SQL:")]), 
+          el("strong", {}, [text("How:")]), 
           text(" "),
-          el("code", {}, [text(q.sql)])
-        ]),
-        el("p", {}, [
-          el("strong", {}, [text("curl command:")])
-        ]),
-        el("pre", {}, [text(q.curl)]),
-        button("Copy curl command", async () => {
-          await navigator.clipboard.writeText(q.curl);
-          alert("curl command copied to clipboard");
-        })
+          el("code", {}, [text(ex.code)])
+        ])
       ])
     ),
     el("p", {}, [
-      text("See "),
+      text("For REST API access to healthcare.gov datasets, see the "),
       el("a", { 
-        href: "https://dkan.readthedocs.io/en/latest/apis/datastore-api.html",
+        href: "https://data.healthcare.gov/api",
         target: "_blank",
         rel: "noopener noreferrer"
-      }, [text("DKAN Datastore API documentation")]),
-      text(" for advanced query syntax.")
+      }, [text("DKAN API documentation")]),
+      text(".")
     ])
   ]);
 }

@@ -1,4 +1,10 @@
 import "fake-indexeddb/auto";
+
+// Polyfill structuredClone for Node.js < 17
+if (typeof global.structuredClone === 'undefined') {
+  global.structuredClone = (value) => JSON.parse(JSON.stringify(value));
+}
+
 import { putDatasetMeta, getDatasetMeta, clearDataset, putChunk, getChunk } from "../src/data/db.js";
 
 describe("IndexedDB cache", () => {

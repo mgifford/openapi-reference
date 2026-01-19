@@ -1,4 +1,5 @@
 import { axe } from "jest-axe";
+import "jest-axe/extend-expect";
 import { renderCsvReference } from "../src/render/csvReference.js";
 
 describe("a11y", () => {

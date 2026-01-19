@@ -18,7 +18,8 @@ function renderCachedDatasets(cachedUrls, onLoadDataset) {
 }
 
 async function fetchHealthcareDataset(datasetId) {
-  const proxyUrl = process.env.PROXY_URL || 'http://localhost:3000';
+  const basePath = window.location.pathname.includes('/openapi-reference') ? '/openapi-reference' : '';
+  const proxyUrl = window.location.origin + basePath;
   const metaUrl = `${proxyUrl}/api/healthcare/dataset/${datasetId}`;
   
   try {

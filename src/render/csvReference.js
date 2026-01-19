@@ -107,47 +107,47 @@ function renderSqlQueryExamples(url, meta) {
   
   const fieldNames = meta.schema.slice(0, 3).map(c => c.name);
   
-  // Provide simple query examples using local filtering and curl for downloads
-  const examples = [
+  // Build SQL API query examples with proper URL encoding
+  // Key: Spaces=%20, Asterisk=%2A, Brackets=%5B%5D, show_db_columns=true (not empty)
+  const queries = [
     {
-      title: "Filter by a specific field (local filtering)",
-      description: `Search in the loaded dataset for records where ${fieldNames[0] || "field_name"} matches your criteria using the Field Search tool above.`,
-      code: `Open the Field Search tool above and search within the ${fieldNames[0] || "field"} column.`
+      title: "Retrieve first 2 rows",
+      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
     },
     {
-      title: "Download full dataset for analysis",
-      description: "Export all records as JSON or CSV for further analysis in Excel, Python, R, or other tools.",
-      code: `Click "Export Records" below to save the full dataset locally.`
+      title: "Select specific columns",
+      curl: fieldNames.length >= 2
+        ? `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20${fieldNames.slice(0, 2).map(f => f.replace(/ /g, '%20')).join('%2C%20')}%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
+        : `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20field_name%20FROM%20${datasetId}%5D%5BLIMIT%202%5D&show_db_columns=true' -H 'accept: application/json'`
     },
     {
-      title: "Paginate through large datasets",
-      description: "This tool automatically caches data locally. Scroll down to load more rows as needed.",
-      code: `The Data Dictionary shows total row count (cached). Scroll to view additional records.`
+      title: "Pagination (rows 500-502)",
+      curl: `curl -X GET 'https://data.healthcare.gov/api/1/datastore/sql?query=%5BSELECT%20%2A%20FROM%20${datasetId}%5D%5BLIMIT%202%20OFFSET%20500%5D&show_db_columns=true' -H 'accept: application/json'`
     }
   ];
 
   return el("section", {}, [
-    el("h2", {}, [text("Query & Filter Examples")]),
-    el("p", {}, [text("This tool provides client-side filtering and export for working with healthcare.gov datasets. For advanced analysis, export the data and use tools like Excel, curl, or Python.")]),
-    ...examples.map(ex => 
+    el("h2", {}, [text("SQL Query Examples (DKAN API)")]),
+    el("p", {}, [text("Healthcare.gov provides direct SQL API access. Copy these curl commands and paste them into your terminal. Requires proper URL encoding (spaces=%20, asterisk=%2A, brackets=%5B%5D).")]),
+    ...queries.map(q => 
       el("div", { class: "prompt-block" }, [
-        el("h3", {}, [text(ex.title)]),
-        el("p", {}, [text(ex.description)]),
-        el("p", {}, [
-          el("strong", {}, [text("How:")]), 
-          text(" "),
-          el("code", {}, [text(ex.code)])
-        ])
+        el("h3", {}, [text(q.title)]),
+        el("p", {}, [el("strong", {}, [text("curl command:")])]),
+        el("pre", {}, [text(q.curl)]),
+        button("Copy curl command", async () => {
+          await navigator.clipboard.writeText(q.curl);
+          alert("curl command copied to clipboard");
+        })
       ])
     ),
     el("p", {}, [
-      text("For REST API access to healthcare.gov datasets, see the "),
+      text("Visit the "),
       el("a", { 
         href: "https://data.healthcare.gov/api",
         target: "_blank",
         rel: "noopener noreferrer"
-      }, [text("DKAN API documentation")]),
-      text(".")
+      }, [text("Healthcare.gov API documentation")]),
+      text(" for more advanced query options.")
     ])
   ]);
 }

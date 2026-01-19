@@ -99,6 +99,70 @@ function renderDataValidationRules(schema) {
   ]);
 }
 
+function renderSqlQueryExamples(url, meta) {
+  // Extract dataset UUID from healthcare.gov CSV URL if possible
+  // Format: https://data.healthcare.gov/api/views/{id}/rows.csv?accessType=DOWNLOAD
+  const match = url.match(/\/views\/([^\/]+)\/rows\.csv/);
+  const datasetId = match ? match[1] : "DATASET_UUID";
+  
+  const fieldNames = meta.schema.slice(0, 3).map(c => c.name);
+  
+  // Build example queries using DKAN datastore SQL API syntax
+  const queries = [
+    {
+      title: "Retrieve first row with column names",
+      sql: `SELECT * FROM ${datasetId} LIMIT 1 OFFSET 0`,
+      curl: `curl "https://data.healthcare.gov/api/1/datastore/sql?query=[SELECT * FROM ${datasetId}][LIMIT 1 OFFSET 0];&show_db_columns"`
+    },
+    {
+      title: "Select specific columns with filtering",
+      sql: fieldNames.length >= 2 
+        ? `SELECT ${fieldNames.slice(0, 2).join(", ")} FROM ${datasetId} WHERE ${fieldNames[0]} = "value"`
+        : `SELECT * FROM ${datasetId} WHERE field_name = "value"`,
+      curl: fieldNames.length >= 2
+        ? `curl "https://data.healthcare.gov/api/1/datastore/sql?query=[SELECT ${fieldNames.slice(0, 2).join(", ")} FROM ${datasetId}][WHERE ${fieldNames[0]} = \\"value\\"];&show_db_columns"`
+        : `curl "https://data.healthcare.gov/api/1/datastore/sql?query=[SELECT * FROM ${datasetId}][WHERE field_name = \\"value\\"];&show_db_columns"`
+    },
+    {
+      title: "Pagination (skip first 500 rows, get next 500)",
+      sql: `SELECT * FROM ${datasetId} LIMIT 500 OFFSET 500`,
+      curl: `curl "https://data.healthcare.gov/api/1/datastore/sql?query=[SELECT * FROM ${datasetId}][LIMIT 500 OFFSET 500];&show_db_columns"`
+    }
+  ];
+
+  return el("section", {}, [
+    el("h2", {}, [text("SQL Query Examples (DKAN API)")]),
+    el("p", {}, [text("Healthcare.gov uses the DKAN datastore SQL API. Copy these examples and use them with curl, your browser, or other tools. Replace \"value\" with your filter criteria.")]),
+    ...queries.map(q => 
+      el("div", { class: "prompt-block" }, [
+        el("h3", {}, [text(q.title)]),
+        el("p", {}, [
+          el("strong", {}, [text("SQL:")]), 
+          text(" "),
+          el("code", {}, [text(q.sql)])
+        ]),
+        el("p", {}, [
+          el("strong", {}, [text("curl command:")])
+        ]),
+        el("pre", {}, [text(q.curl)]),
+        button("Copy curl command", async () => {
+          await navigator.clipboard.writeText(q.curl);
+          alert("curl command copied to clipboard");
+        })
+      ])
+    ),
+    el("p", {}, [
+      text("See "),
+      el("a", { 
+        href: "https://dkan.readthedocs.io/en/latest/apis/datastore-api.html",
+        target: "_blank",
+        rel: "noopener noreferrer"
+      }, [text("DKAN Datastore API documentation")]),
+      text(" for advanced query syntax.")
+    ])
+  ]);
+}
+
 export function renderCsvReference({ root, url, meta, datasetTitle }) {
   root.innerHTML = "";
 
@@ -131,6 +195,7 @@ export function renderCsvReference({ root, url, meta, datasetTitle }) {
   ]));
 
   root.appendChild(renderSampleQueries(meta.schema));
+  root.appendChild(renderSqlQueryExamples(url, meta));
   root.appendChild(renderDataValidationRules(meta.schema));
   root.appendChild(renderExportOptions(meta, url));
 

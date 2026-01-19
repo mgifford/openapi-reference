@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Dataset Explorer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      opacity: 0.95;
+    }
+
+    main {
+      padding: 3rem 2rem;
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    section h2 {
+      color: #667eea;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 0.5rem;
+    }
+
+    .quick-start {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .quick-start {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5rem;
+      background: #f9f9f9;
+    }
+
+    .card h3 {
+      color: #764ba2;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .card p {
+      margin-bottom: 1rem;
+      color: #666;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    a.btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-align: center;
+      flex: 1;
+    }
+
+    a.btn:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    a.btn.secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    a.btn.secondary:hover {
+      background: #f0f0f0;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .feature {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature h4 {
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature p {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .code-block code {
+      display: block;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .instruction-step {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #f0f4ff;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+    }
+
+    .instruction-step strong {
+      color: #667eea;
+    }
+
+    .api-endpoint {
+      background: #f9f9f9;
+      border-left: 4px solid #764ba2;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    .api-endpoint .method {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #764ba2;
+      color: white;
+      border-radius: 3px;
+      font-weight: bold;
+      margin-right: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .bookmarklet-code {
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 6px;
+      font-family: monospace;
+      word-break: break-all;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .warning {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      padding: 1rem;
+      margin: 1rem 0;
+      color: #856404;
+    }
+
+    .success {
+      background: #d4edda;
+      border: 1px solid #28a745;
+      border-radius: 6px;
+      padding: 1rem;
+      margin: 1rem 0;
+      color: #155724;
+    }
+
+    footer {
+      background: #f9f9f9;
+      padding: 2rem;
+      text-align: center;
+      color: #666;
+      border-top: 1px solid #ddd;
+    }
+
+    .use-case {
+      background: white;
+      border: 1px solid #ddd;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+    }
+
+    .use-case h4 {
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .use-case ol, .use-case ul {
+      margin-left: 1.5rem;
+      color: #666;
+    }
+
+    .use-case li {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 CSV Dataset Explorer</h1>
+      <p>Lightweight, accessible data dictionary for government health datasets</p>
+    </header>
+
+    <main>
+      <!-- Quick Start -->
+      <section>
+        <h2>🚀 Quick Start</h2>
+        <div class="quick-start">
+          <div class="card">
+            <h3>Try the Demo</h3>
+            <p>Load and explore CSV files with an interactive data dictionary, validation rules, and AI prompts.</p>
+            <div class="button-group">
+              <a href="/demo/" class="btn">Open Demo</a>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Install Bookmarklet</h3>
+            <p>One-click access from healthcare.gov, CDC, and other data portals. Works anywhere with CSV data.</p>
+            <div class="button-group">
+              <button onclick="generateBookmarklet()" class="btn" style="cursor: pointer; border: none;">Generate Code</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section>
+        <h2>✨ Features</h2>
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">📋</div>
+            <h4>Auto Schema</h4>
+            <p>Infers field types and constraints from data</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🔍</div>
+            <h4>Field Search</h4>
+            <p>Filter & inspect columns instantly</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✅</div>
+            <h4>Validation Rules</h4>
+            <p>Auto-generated constraints per field</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">💾</div>
+            <h4>Local Cache</h4>
+            <p>IndexedDB stores data in browser only</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">📤</div>
+            <h4>Export</h4>
+            <p>Download schema as JSON or CSV</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🤖</div>
+            <h4>AI Prompts</h4>
+            <p>Copy prompts for LLM analysis</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">♿</div>
+            <h4>Accessible</h4>
+            <p>Keyboard-only, ARIA labels, screen readers</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🏥</div>
+            <h4>Healthcare.gov</h4>
+            <p>Direct integration via bookmarklet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bookmarklet Setup -->
+      <section>
+        <h2>🔖 Bookmarklet Setup</h2>
+        <div class="success">
+          <strong>✓ How it works:</strong> One-click access from any data portal. Click the bookmark to load CSV data directly into the explorer.
+        </div>
+
+        <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem;">Step 1: Generate Code</h3>
+        <div class="instruction-step">
+          Click the button below to generate the bookmarklet code. Copy the entire code block.
+        </div>
+        <button onclick="generateBookmarklet()" style="padding: 0.75rem 1.5rem; background: #667eea; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;">
+          Generate Bookmarklet Code
+        </button>
+        <div id="bookmarklet-output"></div>
+
+        <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem;">Step 2: Create Bookmark</h3>
+        <div class="instruction-step">
+          <strong>Option A: Bookmark Manager (Recommended)</strong>
+          <ol style="margin-left: 1rem; margin-top: 0.5rem;">
+            <li>Right-click the browser's bookmark bar → "Add page..."</li>
+            <li>Name: <strong>CSV Explorer</strong></li>
+            <li>URL: Paste the code from Step 1</li>
+            <li>Save</li>
+          </ol>
+        </div>
+        <div class="instruction-step">
+          <strong>Option B: Drag to Bookmark Bar</strong>
+          <ol style="margin-left: 1rem; margin-top: 0.5rem;">
+            <li>Open browser developer tools (F12)</li>
+            <li>Console tab → paste the bookmarklet code</li>
+            <li>Run: <code>generateBookmarklet()</code></li>
+            <li>Drag the generated link to your bookmark bar</li>
+          </ol>
+        </div>
+
+        <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem;">Step 3: Use It</h3>
+        <div class="use-case">
+          <h4>Healthcare.gov Datasets</h4>
+          <ol>
+            <li>Visit any healthcare.gov dataset: <code>https://data.healthcare.gov/dataset/...</code></li>
+            <li>Click your "CSV Explorer" bookmark</li>
+            <li>Explorer opens with data automatically loaded</li>
+          </ol>
+        </div>
+        <div class="use-case">
+          <h4>Any CSV File</h4>
+          <ol>
+            <li>Visit a page with direct CSV links (CDC, CMS, etc.)</li>
+            <li>Click your "CSV Explorer" bookmark</li>
+            <li>Select which CSV to load (if multiple found)</li>
+            <li>Data loads instantly into explorer</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Use Cases -->
+      <section>
+        <h2>💡 Use Cases</h2>
+        
+        <div class="use-case">
+          <h4>1. Explore Healthcare.gov Data</h4>
+          <p>Find datasets on healthcare.gov, click the bookmark, and instantly see the data dictionary with field definitions, validation rules, and sample values.</p>
+          <strong>Example:</strong> <code>https://data.healthcare.gov/dataset/5k5i-wzex</code>
+        </div>
+
+        <div class="use-case">
+          <h4>2. Quick Schema Review</h4>
+          <p>Before loading a CSV into your analysis tool, use the explorer to understand the data structure, field types, and constraints.</p>
+        </div>
+
+        <div class="use-case">
+          <h4>3. AI-Assisted Analysis</h4>
+          <p>Generate pre-written prompts for ChatGPT, Claude, or other LLMs. Copy prompts directly from the explorer to analyze specific fields.</p>
+        </div>
+
+        <div class="use-case">
+          <h4>4. Data Documentation</h4>
+          <p>Export the data dictionary as JSON or CSV headers to include in your project documentation.</p>
+        </div>
+
+        <div class="use-case">
+          <h4>5. Field-Level Search</h4>
+          <p>Search for specific fields across large CSVs. Find all fields matching "patient", "date", "cost", etc.</p>
+        </div>
+      </section>
+
+      <!-- API Endpoints -->
+      <section>
+        <h2>🔌 API Endpoints (Server)</h2>
+        <p>The backend proxy server provides these endpoints for programmatic access:</p>
+
+        <div class="api-endpoint">
+          <span class="method">POST</span> <code>/api/proxy/csv</code>
+          <p style="margin-top: 0.5rem; color: #666;">Fetch any CSV file with CORS handling. Returns raw CSV data.</p>
+          <div class="code-block"><code>curl -X POST http://localhost:3000/api/proxy/csv \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/data.csv"}'</code></div>
+        </div>
+
+        <div class="api-endpoint">
+          <span class="method">GET</span> <code>/api/healthcare/dataset/:id</code>
+          <p style="margin-top: 0.5rem; color: #666;">Extract CSV URLs and metadata from healthcare.gov datasets.</p>
+          <div class="code-block"><code>curl http://localhost:3000/api/healthcare/dataset/5k5i-wzex</code></div>
+          <p style="color: #666; margin-top: 0.5rem;"><strong>Returns:</strong> JSON with dataset title and CSV URLs</p>
+        </div>
+
+        <div class="api-endpoint">
+          <span class="method">GET</span> <code>/api/socrata</code>
+          <p style="margin-top: 0.5rem; color: #666;">Query Socrata data portals (CDC, CMS, etc.) for dataset metadata.</p>
+          <div class="code-block"><code>curl "http://localhost:3000/api/socrata?domain=data.cdc.gov&id=dataset-id"</code></div>
+        </div>
+      </section>
+
+      <!-- Supported Domains -->
+      <section>
+        <h2>🌐 Supported Data Portals</h2>
+        <p>The proxy server handles CORS restrictions for these whitelisted domains:</p>
+        <ul style="margin-left: 1.5rem; color: #666;">
+          <li><strong>healthcare.gov</strong> - Health datasets</li>
+          <li><strong>cdc.gov</strong> - Disease and health statistics</li>
+          <li><strong>cms.gov</strong> - Medicare/Medicaid data</li>
+          <li><strong>healthdata.gov</strong> - Health tracking data</li>
+          <li><strong>github.com</strong> - CSV files in public repos</li>
+        </ul>
+        <div class="warning">
+          ⚠️ <strong>Other domains:</strong> Direct browser requests work if CORS allows. Otherwise, add the domain to <code>server.js</code> whitelist.
+        </div>
+      </section>
+
+      <!-- Architecture -->
+      <section>
+        <h2>🏗️ How It Works</h2>
+        <div class="code-block"><code>Browser                    Node.js Server (localhost:3000)
+├─ CSV Explorer App        ├─ Express.js
+├─ IndexedDB Cache         ├─ CORS Proxy
+├─ Bookmarklet             ├─ Healthcare.gov extractor
+└─ Vanilla JavaScript      └─ Socrata API gateway
+
+User clicks bookmark on healthcare.gov
+        ↓
+Bookmarklet extracts dataset ID
+        ↓
+App opens with ?dataset=ID&domain=healthcare.gov
+        ↓
+Server fetches metadata and CSV URLs
+        ↓
+Browser parses CSV, infers schema
+        ↓
+Data cached locally in IndexedDB (browser only)
+        ↓
+User browses, searches, exports (all local)</code></div>
+      </section>
+
+      <!-- Security -->
+      <section>
+        <h2>🔒 Security & Privacy</h2>
+        <ul style="margin-left: 1.5rem; color: #666; margin-bottom: 1rem;">
+          <li>✅ <strong>No data storage</strong> - Server is stateless, doesn't store any data</li>
+          <li>✅ <strong>Client-side caching</strong> - Data stays in your browser (IndexedDB)</li>
+          <li>✅ <strong>Domain whitelisting</strong> - Only trusted sources allowed through proxy</li>
+          <li>✅ <strong>URL validation</strong> - Unsafe URLs rejected before fetching</li>
+          <li>✅ <strong>HTTPS ready</strong> - Works with HTTPS in production</li>
+        </ul>
+      </section>
+
+      <!-- Troubleshooting -->
+      <section>
+        <h2>❓ Troubleshooting</h2>
+
+        <div class="use-case">
+          <h4>Bookmarklet not working</h4>
+          <p>Ensure the server is running on <code>http://localhost:3000</code> and the bookmarklet code includes the correct <code>PROXY_URL</code>.</p>
+        </div>
+
+        <div class="use-case">
+          <h4>CSV not loading</h4>
+          <p>Check browser console (F12 → Console). Common issues:</p>
+          <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+            <li>Domain not whitelisted (edit <code>server.js</code>)</li>
+            <li>URL is a dataset page, not a direct CSV file</li>
+            <li>CSV requires authentication</li>
+          </ul>
+        </div>
+
+        <div class="use-case">
+          <h4>Healthcare.gov dataset not detected</h4>
+          <p>Run diagnostic in console:</p>
+          <div class="code-block"><code>curl http://localhost:3000/api/healthcare/dataset/5k5i-wzex</code></div>
+        </div>
+      </section>
+
+      <!-- Getting Started -->
+      <section>
+        <h2>📚 Next Steps</h2>
+        <ol style="margin-left: 1.5rem; color: #666; margin-bottom: 1rem;">
+          <li><strong>Try the demo:</strong> <a href="/demo/" style="color: #667eea; text-decoration: none;">Open demo</a></li>
+          <li><strong>Install bookmarklet:</strong> Generate code above and add to your browser</li>
+          <li><strong>Test with healthcare.gov:</strong> Visit <code>https://data.healthcare.gov/dataset/5k5i-wzex</code> and click the bookmark</li>
+          <li><strong>Deploy to production:</strong> See SERVER_DEPLOYMENT.md in the project repo</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <p>CSV Dataset Explorer • Lightweight • Accessible • Zero Dependencies</p>
+      <p style="font-size: 0.9rem; margin-top: 1rem; color: #999;">
+        Built with vanilla JavaScript, IndexedDB, and Express.js
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function generateBookmarklet() {
+      const proxyUrl = window.location.origin;
+      const bookmarkletCode = `javascript:(function(){const PROXY_URL="${proxyUrl}";(async()=>{function getHealthcareDatasetId(){const m=window.location.pathname.match(/dataset\/([a-z0-9\\-]+)/i);return m?m[1]:null}function findCsvUrls(){const links=[...document.querySelectorAll('a[href*=".csv"]')].map(a=>a.href);const scripts=[...document.scripts].map(s=>s.textContent).join(' ');const csvMatches=scripts.match(/https?:[^\\s"'<>]+\\.csv/gi)||[];return[...new Set([...links,...csvMatches])]}const hId=getHealthcareDatasetId();if(hId){return void(window.location.href=PROXY_URL+'/demo/?dataset='+hId+'&domain=healthcare.gov')}const csvUrls=findCsvUrls();if(csvUrls.length===1){return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(csvUrls[0]))}if(csvUrls.length>1){const selected=prompt('Multiple CSVs found. Paste one URL or select first:\\n'+csvUrls.slice(0,5).join('\\n'));return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(selected||csvUrls[0]))}const manualUrl=prompt('No CSVs found. Paste a CSV URL:');manualUrl&&(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(manualUrl))})()})();`;
+      
+      const outputDiv = document.getElementById('bookmarklet-output');
+      outputDiv.innerHTML = `
+        <div style="margin-top: 2rem;">
+          <h4 style="color: #667eea; margin-bottom: 1rem;">✓ Bookmarklet Code Generated</h4>
+          <p style="color: #666; margin-bottom: 1rem;">Copy the code below and create a bookmark with it as the URL:</p>
+          <div class="bookmarklet-code">${bookmarkletCode}</div>
+          <button onclick="copyToClipboard()" style="padding: 0.75rem 1.5rem; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem;">
+            📋 Copy Code to Clipboard
+          </button>
+          <p id="copy-status" style="margin-top: 1rem; color: #28a745; font-weight: 600;"></p>
+        </div>
+      `;
+      
+      // Store for copy button
+      window.bookmarkletCode = bookmarkletCode;
+    }
+
+    function copyToClipboard() {
+      const code = window.bookmarkletCode;
+      navigator.clipboard.writeText(code).then(() => {
+        const status = document.getElementById('copy-status');
+        status.textContent = '✓ Copied to clipboard!';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      }).catch(err => {
+        alert('Failed to copy: ' + err);
+      });
+    }
+
+    // Show bookmarklet section on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Pre-generate on page load
+      // generateBookmarklet(); // Uncomment if you want auto-generate
+    });
+  </script>
+</body>
+</html>

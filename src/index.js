@@ -36,7 +36,11 @@ async function fetchHealthcareDataset(datasetId) {
       );
       
       if (csvResources.length > 0) {
-        return csvResources[0].url;
+        return {
+          url: csvResources[0].url,
+          title: data.result.title || data.result.name || 'Dataset',
+          description: data.result.notes || ''
+        };
       }
     }
     
@@ -95,7 +99,7 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
     status.className = isError ? 'error' : 'success';
   };
 
-  const loadDataset = async (url) => {
+  const loadDataset = async (url, datasetTitle = null) => {
     urlInput.value = url;
     setStatus("Fetching and caching…");
 
@@ -107,8 +111,9 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
           const datasetId = match[1];
           setStatus(`Detected healthcare.gov dataset. Fetching metadata…`);
           try {
-            const csvUrl = await fetchHealthcareDataset(datasetId);
-            url = csvUrl; // Use the CSV URL instead
+            const metadata = await fetchHealthcareDataset(datasetId);
+            url = metadata.url; // Use the CSV URL instead
+            datasetTitle = metadata.title; // Capture the title
             setStatus(`Found CSV. Loading data…`);
           } catch (err) {
             throw new Error(`Could not extract CSV from dataset: ${err.message}`);
@@ -118,7 +123,7 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
 
       const result = await importCsvFromUrl(url, { chunkSize: 1000, force: true });
       setStatus(result.fromCache ? "Loaded from cache." : "Fetched and cached.");
-      renderCsvReference({ root: contentArea, url, meta: result.meta });
+      renderCsvReference({ root: contentArea, url, meta: result.meta, datasetTitle });
       updateCachedList();
     } catch (err) {
       console.error(err);
@@ -164,8 +169,8 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
     isLoadingHealthcare = true;
     setStatus("Loading healthcare.gov dataset...");
     try {
-      const csvUrl = await fetchHealthcareDataset(healthcareDatasetId);
-      await loadDataset(csvUrl);
+      const metadata = await fetchHealthcareDataset(healthcareDatasetId);
+      await loadDataset(metadata.url, metadata.title);
     } catch (err) {
       setStatus(`Failed to load healthcare.gov dataset: ${err.message}`, true);
     }

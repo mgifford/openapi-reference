@@ -99,10 +99,18 @@ function renderDataValidationRules(schema) {
   ]);
 }
 
-export function renderCsvReference({ root, url, meta }) {
+export function renderCsvReference({ root, url, meta, datasetTitle }) {
   root.innerHTML = "";
 
   root.appendChild(el("h1", {}, [text("Dataset Explorer")]));
+
+  // Show dataset title if provided (from healthcare.gov API)
+  if (datasetTitle) {
+    root.appendChild(el("section", { class: "summary" }, [
+      el("h2", {}, [text("Dataset")]),
+      el("h3", {}, [text(datasetTitle)])
+    ]));
+  }
 
   root.appendChild(el("section", { class: "summary" }, [
     el("h2", {}, [text("Source")]),

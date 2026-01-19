@@ -363,42 +363,42 @@
         <div class="features">
           <div class="feature">
             <div class="feature-icon">📋</div>
-            <h4>Auto Schema</h4>
+            <h3>Auto Schema</h3>
             <p>Infers field types and constraints from data</p>
           </div>
           <div class="feature">
             <div class="feature-icon">🔍</div>
-            <h4>Field Search</h4>
+            <h3>Field Search</h3>
             <p>Filter &amp; inspect columns instantly</p>
           </div>
           <div class="feature">
             <div class="feature-icon">✅</div>
-            <h4>Validation Rules</h4>
+            <h3>Validation Rules</h3>
             <p>Auto-generated constraints per field</p>
           </div>
           <div class="feature">
             <div class="feature-icon">💾</div>
-            <h4>Local Cache</h4>
+            <h3>Local Cache</h3>
             <p>IndexedDB stores data in browser only</p>
           </div>
           <div class="feature">
             <div class="feature-icon">📤</div>
-            <h4>Export</h4>
+            <h3>Export</h3>
             <p>Download schema as JSON or CSV</p>
           </div>
           <div class="feature">
             <div class="feature-icon">🤖</div>
-            <h4>AI Prompts</h4>
+            <h3>AI Prompts</h3>
             <p>Copy prompts for LLM analysis</p>
           </div>
           <div class="feature">
             <div class="feature-icon">♿</div>
-            <h4>Accessible</h4>
+            <h3>Accessible</h3>
             <p>Keyboard-only, ARIA labels, screen readers</p>
           </div>
           <div class="feature">
             <div class="feature-icon">🏥</div>
-            <h4>Healthcare.gov</h4>
+            <h3>Healthcare.gov</h3>
             <p>Direct integration via bookmarklet</p>
           </div>
         </div>
@@ -462,28 +462,28 @@
         <h2>💡 Use Cases</h2>
 
         <div class="use-case">
-          <h4>1. Explore Healthcare.gov Data</h4>
+          <h3>1. Explore Healthcare.gov Data</h3>
           <p>Find datasets on healthcare.gov, click the bookmark, and instantly see the data dictionary with field definitions, validation rules, and sample values.</p>
           <strong>Example:</strong> <code>https://data.healthcare.gov/dataset/5k5i-wzex</code>
         </div>
 
         <div class="use-case">
-          <h4>2. Quick Schema Review</h4>
+          <h3>2. Quick Schema Review</h3>
           <p>Before loading a CSV into your analysis tool, use the explorer to understand the data structure, field types, and constraints.</p>
         </div>
 
         <div class="use-case">
-          <h4>3. AI-Assisted Analysis</h4>
+          <h3>3. AI-Assisted Analysis</h3>
           <p>Generate pre-written prompts for ChatGPT, Claude, or other LLMs. Copy prompts directly from the explorer to analyze specific fields.</p>
         </div>
 
         <div class="use-case">
-          <h4>4. Data Documentation</h4>
+          <h3>4. Data Documentation</h3>
           <p>Export the data dictionary as JSON or CSV headers to include in your project documentation.</p>
         </div>
 
         <div class="use-case">
-          <h4>5. Field-Level Search</h4>
+          <h3>5. Field-Level Search</h3>
           <p>Search for specific fields across large CSVs. Find all fields matching "patient", "date", "cost", etc.</p>
         </div>
       </section>
@@ -572,12 +572,12 @@ User browses, searches, exports (all local)</code></div>
         <h2>❓ Troubleshooting</h2>
 
         <div class="use-case">
-          <h4>Bookmarklet not working</h4>
+          <h3>Bookmarklet not working</h3>
           <p>Ensure the server is running on <code>http://localhost:3000</code> and the bookmarklet code includes the correct <code>PROXY_URL</code>.</p>
         </div>
 
         <div class="use-case">
-          <h4>CSV not loading</h4>
+          <h3>CSV not loading</h3>
           <p>Check browser console (F12 → Console). Common issues:</p>
           <ul class="compact-list">
             <li>Domain not whitelisted (edit <code>server.js</code>)</li>
@@ -587,7 +587,7 @@ User browses, searches, exports (all local)</code></div>
         </div>
 
         <div class="use-case">
-          <h4>Healthcare.gov dataset not detected</h4>
+          <h3>Healthcare.gov dataset not detected</h3>
           <p>Run diagnostic in console:</p>
           <div class="code-block"><code>curl http://localhost:3000/api/healthcare/dataset/5k5i-wzex</code></div>
         </div>
@@ -626,7 +626,7 @@ User browses, searches, exports (all local)</code></div>
         <div class="mt-2">
           <h4 class="text-accent mb-1">📌 Bookmarklet</h4>
           <p class="text-muted">Option A: Copy the code below and create a bookmark with it as the URL.</p>
-          <div class="bookmarklet-code">${safeCode}</div>
+          <div class="bookmarklet-code" tabindex="0" role="region" aria-label="Bookmarklet code">${safeCode}</div>
           <button type="button" onclick="copyToClipboard('${bookmarkletCode.replace(/'/g, "\\'")}');" class="btn-ghost secondary">
             📋 Copy Code to Clipboard
           </button>

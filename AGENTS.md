@@ -1,5 +1,16 @@
 # AGENTS.md
 
+> **System instructions for AI coding assistants contributing to this project.**
+>
+> This file provides guidance for AI agents (GitHub Copilot, Cursor, Claude, GPT-4, etc.) to maintain project standards and quality.
+
+## Primary References
+
+Before proposing or writing changes, read these project policy files:
+
+1. **[ACCESSIBILITY.md](./ACCESSIBILITY.md)** — Accessibility commitment, requirements, and known issues (WCAG 2.2 AA)
+2. **[README.md](./README.md)** — Project overview, architecture, and deployment
+
 ## Purpose
 
 This repository provides an **accessible, human-readable CSV dataset explorer** with intelligent CORS handling and healthcare.gov integration.
@@ -84,3 +95,58 @@ A change is complete when:
 - Security scan: 0 high-severity issues
 - Works with keyboard only and assistive technology
 - Local validation completed before pushing to GitHub
+
+## Accessibility Requirements for AI Agents
+
+All code changes must comply with **WCAG 2.2 Level AA**. See [ACCESSIBILITY.md](./ACCESSIBILITY.md) for the full policy. Key rules that must never be violated:
+
+### DOM Construction
+- Always use `document.createElement` — **never** `innerHTML` with template literals or string concatenation
+- This prevents both XSS vulnerabilities and accessibility regressions from malformed HTML
+
+### Form Controls
+- Every `<input>`, `<select>`, and `<textarea>` must have an explicit `<label for="...">` or `aria-label`
+- `placeholder` is not a substitute for a label — it disappears when the user types and is inconsistently read by screen readers
+
+### Focus Management
+- Never use `outline: none` without providing an equivalent or better visible focus indicator that meets WCAG 2.4.11
+- Focus order must follow the visual/logical reading order of the page
+
+### Semantic Structure
+- Use `<button>` for actions, `<a>` for navigation — never swap roles or add `role="button"` to links
+- Use heading hierarchy correctly: one `<h1>` per page, then `<h2>`, `<h3>`, etc. without skipping levels
+- Use landmark elements (`<header>`, `<main>`, `<nav>`, `<aside>`, `<footer>`) for page regions
+- Include a skip-to-main-content link at the top of every page with repeated navigation
+
+### Dynamic Content
+- Use `role="status"` + `aria-live="polite"` for non-urgent status messages
+- Use `aria-live="assertive"` only for urgent alerts; avoid overuse
+
+### Decorative Content
+- Emoji used as decoration (not conveyance of unique meaning) should be wrapped with `aria-hidden="true"`
+- Images that are purely decorative must have `alt=""`
+
+### Colour and Contrast
+- Normal text: minimum 4.5:1 contrast ratio against background
+- Large text (18pt / 14pt bold): minimum 3:1 contrast ratio
+- UI components and focus indicators: minimum 3:1 contrast ratio
+
+## Priority Taxonomy
+
+When identifying issues, use this severity scale:
+
+- **Critical** — Prevents a user from completing a core task (loading data, searching fields, exporting)
+- **High** — Significantly impedes AT users (e.g., missing label, invisible focus indicator)
+- **Medium** — Creates friction or confusion (e.g., missing skip link, unclear heading hierarchy)
+- **Low** — Minor improvement, cosmetic, or enhancement (e.g., decorative emoji without aria-hidden)
+
+Never suggest changes that introduce Critical or High severity accessibility issues.
+
+## Quick Decision Framework
+
+If uncertain about an approach:
+
+1. Consult [ACCESSIBILITY.md](./ACCESSIBILITY.md) for project accessibility policy
+2. Choose the more semantic HTML option before reaching for ARIA
+3. Test with keyboard-only navigation before marking a feature complete
+4. When in doubt, choose the more accessible option

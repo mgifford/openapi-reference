@@ -7,6 +7,23 @@ A lightweight, accessible CSV data explorer for government health datasets. **Hy
 - 🏥 **Healthcare.gov** - One-click integration via bookmarklet
 - ♿ **Accessible** - Keyboard-only, ARIA labels, screen readers
 - 📦 **Zero production dependencies** - Vanilla JS only
+- 🔬 **DKAN Companion** - Dedicated dataset explainer for CMS open data
+
+## DKAN Open Data Companion
+
+A proof-of-concept companion tool for CMS DKAN datasets is included at
+[`dkan-companion.html`](./dkan-companion.html).
+
+It is a **read-only, client-side dataset explainer and query helper** that:
+- Ingests DKAN dataset metadata via the CKAN-compatible API
+- Generates inferred field dictionaries and data quality profiles
+- Provides DKAN-aware query templates (respects DKAN's SQL limitations)
+- Surfaces evidence-triggered review questions
+- Exports artifacts for CMS workflows (JSON, Markdown)
+- Optionally uses Chrome Built-in AI for plain-language summaries (local, on-device)
+
+> **It does not modify DKAN or draw policy conclusions.**
+> See [DKAN_COMPANION.md](./DKAN_COMPANION.md) for full documentation.
 
 ## ✨ Features
 

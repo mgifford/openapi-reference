@@ -3,10 +3,22 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import rateLimit from 'express-rate-limit';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+/**
+ * Rate limiter for static page routes (GET /  and GET /dkan-companion).
+ * Limits each IP to 60 requests per minute to prevent file-system abuse.
+ */
+const pageRateLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 // Enable CORS for all routes
 app.use(cors({
@@ -153,8 +165,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/demo', express.static(path.join(__dirname, 'demo')));
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
-app.get('/', (req, res) => {
+app.get('/', pageRateLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, 'demo', 'landing.html'));
+});
+
+/**
+ * Serve the DKAN companion page
+ */
+app.get('/dkan-companion', pageRateLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, 'dkan-companion.html'));
 });
 
 /**
@@ -215,5 +234,6 @@ function extractHealthcareMetadata(html, id) {
 app.listen(PORT, () => {
   console.log(`✅ CSV Explorer Proxy Server running on port ${PORT}`);
   console.log(`📊 Demo: http://localhost:${PORT}/demo/`);
+  console.log(`🔬 DKAN Companion: http://localhost:${PORT}/dkan-companion`);
   console.log(`🔗 API: http://localhost:${PORT}/api/proxy/csv`);
 });

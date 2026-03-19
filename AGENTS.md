@@ -142,6 +142,23 @@ When identifying issues, use this severity scale:
 
 Never suggest changes that introduce Critical or High severity accessibility issues.
 
+## AI Disclosure Requirement
+
+Transparency about AI use is a core value of this project. When contributing as an AI agent, you **must** keep the **`## 🤖 AI Disclosure`** section in `README.md` accurate and up to date.
+
+Specifically:
+
+1. **If you introduce new AI-assisted features** (e.g., browser-based AI, server-side LLM calls, embedded model inference), add a row to the relevant table in the AI Disclosure section describing:
+   - Which AI tool or model is used
+   - What it is used for
+   - Whether any user data is sent externally
+
+2. **If you are an AI coding assistant** (e.g., GitHub Copilot, Claude, GPT-4, Cursor), update the "Used to Build This Project" table to reflect your involvement if the tool is not already listed.
+
+3. **Do not add AI tools that were not actually used.** Accuracy matters more than completeness.
+
+4. **Do not remove existing entries** unless a feature has been fully removed and the AI tool is no longer in use anywhere in the project.
+
 ## Quick Decision Framework
 
 If uncertain about an approach:

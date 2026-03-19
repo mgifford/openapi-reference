@@ -285,6 +285,40 @@ See [HEALTHCARE_INTEGRATION.md](HEALTHCARE_INTEGRATION.md) for:
 3. **Test healthcare.gov:** Follow HEALTHCARE_INTEGRATION.md
 4. **Deploy:** Follow SERVER_DEPLOYMENT.md
 
+## 🤖 AI Disclosure
+
+Transparency about AI use is a project requirement. This section documents all AI involvement in building and running this project.
+
+### Used to Build This Project
+
+| AI Tool | How It Was Used |
+|---------|----------------|
+| **GitHub Copilot** | Used during development to assist with code generation, refactoring, and writing documentation. All AI-assisted code was reviewed and tested by human contributors before merging. |
+
+### Used When Running the Application
+
+| AI Tool | How It Is Used | Data Sent? |
+|---------|---------------|------------|
+| **Chrome Built-in AI (`window.ai`)** | Optional plain-language summaries in the DKAN Companion | No — runs locally on-device |
+
+**Chrome Built-in AI details:**
+- Powers the "Generate explanation (Built-in AI)" and "Generate more questions (Built-in AI)" buttons in the DKAN Open Data Companion
+- Uses the browser's on-device model (Gemini Nano via `window.ai.languageModel`)
+- Only activates when the user explicitly clicks the button and only if the browser supports `window.ai`
+- All inference runs locally in the browser — no data is sent to any external server
+
+### User-Directed AI Prompts (Not Embedded)
+
+The application generates **copyable prompt templates** that users can paste into any external LLM of their choosing (e.g. ChatGPT, Claude, Gemini). These prompts are displayed as plain text only — the application **never automatically sends data to any external AI service**.
+
+### AI Not Used in This Project
+
+- No server-side LLM calls (the Node.js proxy is stateless and contains no AI logic)
+- No AI-powered search, ranking, or classification of datasets
+- No automated AI content generation on page load
+
+---
+
 ## 📝 License
 
 MIT

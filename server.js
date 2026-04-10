@@ -185,6 +185,11 @@ function isSafeUrl(url) {
     // Whitelist trusted domains
     const trustedDomains = [
       'data.healthcare.gov',
+      'data.medicaid.gov',
+      'openpaymentsdata.cms.gov',
+      'openpaymentsdata.gov',
+      'data.cms.gov',
+      'pfs.data.cms.gov',
       'data.cdc.gov',
       'healthdata.gov',
       'cms.gov',

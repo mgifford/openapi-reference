@@ -503,16 +503,19 @@
       <!-- Supported Domains -->
       <section>
         <h2><span aria-hidden="true">🌐 </span>Supported Data Portals</h2>
-        <p>The proxy server handles CORS restrictions for these whitelisted domains:</p>
+        <p>The proxy server handles CORS restrictions for these supported data portals and related hosts:</p>
         <ul class="muted-list">
-          <li><strong>healthcare.gov</strong> - Health datasets</li>
-          <li><strong>cdc.gov</strong> - Disease and health statistics</li>
-          <li><strong>cms.gov</strong> - Medicare/Medicaid data</li>
-          <li><strong>healthdata.gov</strong> - Health tracking data</li>
-          <li><strong>github.com</strong> - CSV files in public repos</li>
+          <li><strong>Data.Healthcare.gov</strong> - Marketplace and health insurance datasets from <code>data.healthcare.gov</code></li>
+          <li><strong>Data.Medicaid.gov</strong> - Medicaid datasets and downloads from <code>data.medicaid.gov</code></li>
+          <li><strong>OpenPaymentsData.gov</strong> - Open Payments transparency data from <code>openpaymentsdata.cms.gov</code> and related Open Payments hosts</li>
+          <li><strong>CMS Provider Data</strong> - Provider datasets from <code>data.cms.gov/provider-data/</code></li>
+          <li><strong>PFS Data CMS</strong> - Physician Fee Schedule datasets from <code>pfs.data.cms.gov</code></li>
+          <li><strong>CDC Data Portal</strong> - Public health datasets from <code>data.cdc.gov</code></li>
+          <li><strong>HealthData.gov</strong> - Federal health datasets from <code>healthdata.gov</code></li>
+          <li><strong>GitHub raw/public CSV links</strong> - CSV files in public repositories from <code>github.com</code> and <code>raw.githubusercontent.com</code></li>
         </ul>
         <div class="warning">
-          <span aria-hidden="true">⚠️ </span><strong>Other domains:</strong> Direct browser requests work if CORS allows. Otherwise, add the domain to <code>server.js</code> whitelist.
+          <span aria-hidden="true">⚠️ </span><strong>Other portals:</strong> Direct browser requests still work if CORS allows. For additional proxy-backed portals, add the host to the allowlist in <code>server.js</code>.
         </div>
       </section>
 

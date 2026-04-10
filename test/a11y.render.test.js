@@ -62,7 +62,7 @@ describe("a11y", () => {
     renderCsvReference({ root, url: "https://example.com/x.csv", meta, datasetTitle: "Example dataset" });
 
     expect(root.textContent).toContain("Explore with Built-in AI");
-    expect(root.textContent).toContain("Chrome Built-in AI is not available in this browser.");
+    expect(root.textContent).toContain("Checking built-in browser AI availability");
     expect(root.textContent).toContain("Show copyable explanation prompt");
     expect(root.textContent).toContain("Show copyable question prompt");
     expect(root.textContent).toContain("Chrome:");

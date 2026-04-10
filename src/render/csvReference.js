@@ -3,6 +3,8 @@ import {
   buildCsvExplorerExplainPrompt,
   buildCsvExplorerQuestionsPrompt,
   getBuiltinAiBrowserSupport,
+  getBuiltinAiAvailability,
+  hasBuiltinAiPromptApi,
   isBuiltinAiAvailable,
   runBuiltinAi
 } from "../ai/prompts/dataset.js";
@@ -139,6 +141,30 @@ function renderAiExplorerSection(url, meta, datasetTitle) {
   const questionsPrompt = buildCsvExplorerQuestionsPrompt({ title: datasetTitle, url, meta });
   const outputEl = el("div", { role: "status", "aria-live": "polite", class: "ai-output" }, []);
   const browserSupport = getBuiltinAiBrowserSupport(typeof navigator !== "undefined" ? navigator.userAgent : "");
+  const availabilityNote = el("p", { class: "ai-unavailable", id: "builtinAiStatus" }, [
+    text("Checking built-in browser AI availability…")
+  ]);
+
+  const setAvailabilityMessage = (state) => {
+    if (state === "available" || state === "detected") {
+      availabilityNote.textContent = "Built-in browser AI is ready in this browser.";
+      return;
+    }
+
+    if (state === "downloadable") {
+      availabilityNote.textContent = "Prompt API detected, but the browser's on-device model is not downloaded yet. Try the AI buttons after the browser finishes preparing the model, or let the browser continue downloading it automatically.";
+      return;
+    }
+
+    if (state === "downloading") {
+      availabilityNote.textContent = "Prompt API detected and the browser is still downloading the on-device model. Try again after the download completes.";
+      return;
+    }
+
+    availabilityNote.textContent = hasBuiltinAiPromptApi()
+      ? "Built-in browser AI was detected, but it is not ready for prompting yet."
+      : "Built-in browser AI is not available here, but you can still use the copyable prompts below with an external AI tool if you choose.";
+  };
 
   const renderResult = (title, content) => {
     outputEl.replaceChildren(
@@ -158,11 +184,12 @@ function renderAiExplorerSection(url, meta, datasetTitle) {
     el("p", {}, [text(
       aiAvailable
         ? "If your browser supports built-in AI, you can generate an on-device summary and suggested questions for this CSV. Any generated text comes from your browser's local LLM rather than a remote AI service."
-        : "Built-in browser AI is not available here, but you can still use the copyable prompts below with an external AI tool if you choose."
+        : "If Prompt API support is present but not ready yet, the status below will explain whether the model is still downloading. You can also use the copyable prompts below with an external AI tool if you choose."
     )]),
     el("p", { class: "ai-generated-label" }, [
       text("Any response shown in this section is AI-generated using the browser's built-in LLM when available.")
     ]),
+    availabilityNote,
     el("ul", { class: "ai-support-list" }, browserSupport.map(browser =>
       el("li", {}, [
         el("strong", {}, [text(`${browser.label}: `)]),
@@ -210,9 +237,15 @@ function renderAiExplorerSection(url, meta, datasetTitle) {
 
     section.appendChild(el("div", { class: "button-group" }, [explainBtn, askBtn]));
   } else {
-    section.appendChild(el("p", { class: "ai-unavailable" }, [
-      text("Chrome Built-in AI is not available in this browser.")
-    ]));
+    getBuiltinAiAvailability().then(setAvailabilityMessage).catch(() => {
+      setAvailabilityMessage("unavailable");
+    });
+  }
+
+  if (aiAvailable) {
+    getBuiltinAiAvailability().then(setAvailabilityMessage).catch(() => {
+      setAvailabilityMessage("detected");
+    });
   }
 
   section.appendChild(el("details", {}, [

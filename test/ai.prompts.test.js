@@ -2,7 +2,9 @@ import {
   buildCsvExplorerExplainPrompt,
   buildCsvExplorerQuestionsPrompt,
   detectBrowserFamily,
-  getBuiltinAiBrowserSupport
+  getBuiltinAiAvailability,
+  getBuiltinAiBrowserSupport,
+  hasBuiltinAiPromptApi
 } from "../src/ai/prompts/dataset.js";
 
 describe("CSV explorer AI prompts", () => {
@@ -65,6 +67,11 @@ describe("CSV explorer AI prompts", () => {
 });
 
 describe("built-in AI browser support detection", () => {
+  afterEach(() => {
+    delete window.ai;
+    delete window.LanguageModel;
+  });
+
   test("detects browser families conservatively", () => {
     expect(detectBrowserFamily("Mozilla/5.0 Chrome/123.0.0.0 Safari/537.36")).toBe("chrome");
     expect(detectBrowserFamily("Mozilla/5.0 Edg/123.0.0.0")).toBe("edge");
@@ -77,5 +84,23 @@ describe("built-in AI browser support detection", () => {
 
     expect(current).toBeTruthy();
     expect(current.label).toBe("Edge");
+  });
+
+  test("detects modern Prompt API namespace and availability", async () => {
+    window.LanguageModel = {
+      availability: async () => "downloadable"
+    };
+
+    expect(hasBuiltinAiPromptApi()).toBe(true);
+    await expect(getBuiltinAiAvailability()).resolves.toBe("downloadable");
+  });
+
+  test("falls back to detected state for older window.ai namespace", async () => {
+    window.ai = {
+      languageModel: {}
+    };
+
+    expect(hasBuiltinAiPromptApi()).toBe(true);
+    await expect(getBuiltinAiAvailability()).resolves.toBe("detected");
   });
 });

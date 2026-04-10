@@ -6,7 +6,7 @@
  * They are displayed as plain text for the user to copy into an AI tool
  * of their choosing.
  *
- * If Chrome Built-in AI (window.ai) is present, the module also exposes
+ * If built-in browser AI is present, the module also exposes
  * helper functions to generate text locally. The caller must check
  * isBuiltinAiAvailable() before using those helpers.
  */
@@ -287,18 +287,52 @@ export function getBuiltinAiBrowserSupport(userAgent = "") {
   ];
 }
 
+function getPromptApiNamespace() {
+  if (typeof window === "undefined") return null;
+  if (typeof window.LanguageModel !== "undefined") return window.LanguageModel;
+  if (typeof window.ai !== "undefined" && typeof window.ai.languageModel !== "undefined") {
+    return window.ai.languageModel;
+  }
+  return null;
+}
+
 /**
- * Detect whether Chrome Built-in AI (window.ai) is available.
+ * Detect whether a built-in prompt API namespace is present at all.
+ *
+ * @returns {boolean}
+ */
+export function hasBuiltinAiPromptApi() {
+  return getPromptApiNamespace() !== null;
+}
+
+/**
+ * Return the prompt API readiness state when available.
+ *
+ * @returns {Promise<"unavailable"|"downloadable"|"downloading"|"available"|"detected">}
+ */
+export async function getBuiltinAiAvailability() {
+  const promptApi = getPromptApiNamespace();
+  if (!promptApi) return "unavailable";
+
+  if (typeof promptApi.availability === "function") {
+    try {
+      return await promptApi.availability();
+    } catch {
+      return "detected";
+    }
+  }
+
+  return "detected";
+}
+
+/**
+ * Detect whether built-in AI can create a session immediately.
  * Safe to call in any browser context.
  *
  * @returns {boolean}
  */
 export function isBuiltinAiAvailable() {
-  return (
-    typeof window !== "undefined" &&
-    typeof window.ai !== "undefined" &&
-    typeof window.ai.languageModel !== "undefined"
-  );
+  return hasBuiltinAiPromptApi();
 }
 
 /**
@@ -310,12 +344,15 @@ export function isBuiltinAiAvailable() {
  * @returns {Promise<string>}
  */
 export async function runBuiltinAi(prompt, signal) {
-  if (!isBuiltinAiAvailable()) {
-    throw new Error("Chrome Built-in AI is not available in this browser.");
+  const promptApi = getPromptApiNamespace();
+  if (!promptApi) {
+    throw new Error("Built-in browser AI is not available in this browser.");
   }
 
-  const session = await window.ai.languageModel.create();
+  const session = await promptApi.create();
   const result = await session.prompt(prompt, signal ? { signal } : undefined);
-  session.destroy();
+  if (session && typeof session.destroy === "function") {
+    session.destroy();
+  }
   return result;
 }

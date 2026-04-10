@@ -1,6 +1,7 @@
 import { importCsvFromUrl, loadFromCache, getAllCachedDatasets } from "./data/importCsv.js";
 import { el, text, button } from "./render/components.js";
 import { renderCsvReference } from "./render/csvReference.js";
+import { applyTheme, createThemeToggle, getPreferredTheme, getStoredTheme, storeThemePreference } from "./ui/theme.js";
 
 function renderCachedDatasets(cachedUrls, onLoadDataset) {
   if (cachedUrls.length === 0) {
@@ -104,6 +105,9 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
   const domain = urlParams.get('domain');
 
   let initialUrl = paramUrl || defaultCsvUrl;
+  let currentTheme = getPreferredTheme();
+  applyTheme(currentTheme);
+
   const sidebar = el("aside", {}, [
     el("h1", {}, [text("CSV Explorer")]),
     el("label", { for: "csvUrl" }, [text("CSV URL")]),
@@ -124,9 +128,34 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
   ]);
 
   const contentArea = el("main", { id: "main-content", tabindex: "-1" }, []);
-  const wrapper = el("div", { style: "display: flex; height: 100vh;" }, [sidebar, contentArea]);
+  const { buttonEl: themeToggle, update: updateThemeToggle } = createThemeToggle(() => {
+    currentTheme = currentTheme === "dark" ? "light" : "dark";
+    applyTheme(currentTheme);
+    storeThemePreference(currentTheme);
+    updateThemeToggle(currentTheme);
+  });
+
+  const topControls = el("div", { class: "top-controls" }, [themeToggle]);
+  const wrapper = el("div", { class: "app-shell" }, [topControls, sidebar, contentArea]);
 
   container.replaceChildren(wrapper);
+  updateThemeToggle(currentTheme);
+
+  if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleThemeChange = (event) => {
+      if (getStoredTheme()) return;
+      currentTheme = event.matches ? "dark" : "light";
+      applyTheme(currentTheme);
+      updateThemeToggle(currentTheme);
+    };
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleThemeChange);
+    } else if (typeof mediaQuery.addListener === "function") {
+      mediaQuery.addListener(handleThemeChange);
+    }
+  }
 
   const status = sidebar.querySelector("#status");
   const cachedListContainer = sidebar.querySelector("#cachedList");

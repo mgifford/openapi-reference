@@ -77,43 +77,16 @@ Contributors are encouraged to test with:
 
 ## 7. Known Accessibility Issues
 
-The following accessibility issues were identified during the code review on 2026-03-09 and should be filed as GitHub issues with the **accessibility** label:
+The issues documented in the 2026-03-09 source review were addressed in the current source as of 2026-04-10, including:
 
-### High Priority
+- explicit labeling for the field search input
+- visible focus indicators for URL and field-search inputs
+- skip links on the landing page and demo
+- `document.createElement`-based bookmarklet rendering instead of `innerHTML`
+- decorative heading emoji marked with `aria-hidden`
+- CSS heading selector aligned to the actual feature card markup
 
-**1. Missing label for field search input** (`src/render/csvReference.js`)
-- The `renderFieldSearch()` function creates an `<input type="text" id="fieldSearch">` with only a `placeholder` attribute and no associated `<label>` element.
-- WCAG violation: 1.3.1 (Info and Relationships), 4.1.2 (Name, Role, Value)
-- Fix: Add `<label for="fieldSearch">Search fields</label>` before the input.
-
-**2. Focus indicators suppressed with `outline: none`** (`demo/style.css`)
-- `input[type="url"]:focus` and `#fieldSearch:focus` both set `outline: none` with a replacement box-shadow at only 10% opacity (`rgba(0, 102, 204, 0.1)`).
-- The low-opacity shadow may not meet the 3:1 contrast requirement for focus indicators under WCAG 2.4.11 (Focus Appearance, WCAG 2.2 AA).
-- Fix: Replace with a solid or higher-opacity focus ring (e.g., `box-shadow: 0 0 0 2px #0066cc`).
-
-### Medium Priority
-
-**3. Skip navigation link missing** (`index.html`, `demo/index.html`)
-- Neither page provides a skip-to-main-content link. Keyboard-only users must Tab through the entire header/sidebar on every page load to reach main content.
-- WCAG violation: 2.4.1 (Bypass Blocks)
-- Fix: Add `<a class="skip-link" href="#main-content">Skip to main content</a>` as the first element in `<body>`, and add `id="main-content"` to the `<main>` element.
-
-**4. `innerHTML` usage in `index.html` JavaScript** (`index.html` lines 591–605)
-- The bookmarklet link and copy button are rendered using `element.innerHTML = \`...\`` with template literals, violating the project's requirement to use `document.createElement`.
-- This also creates a maintainability and potential security concern (the bookmarklet URL is derived from `window.location`, so the risk is low, but the pattern is dangerous).
-- AGENTS.md principle violated: "DOM must be constructed using `document.createElement` (not string templates)"
-- Fix: Refactor bookmarklet link and copy button generation to use `document.createElement`.
-
-### Low Priority
-
-**5. Decorative emoji in headings lack `aria-hidden`** (`index.html`)
-- Section headings contain leading emoji (🚀, ✨, 🔖, 💡, 🔌, etc.) that will be announced by screen readers as their full Unicode description (e.g., "rocket ship Quick Start").
-- While not a hard WCAG failure, this creates a noisy experience for screen reader users.
-- Fix: Wrap leading emoji in `<span aria-hidden="true">` elements.
-
-**6. Heading level mismatch in CSS** (`index.html`)
-- The CSS rule `.feature h4 { color: #5048e5; }` targets `<h4>` elements, but the feature cards in the HTML use `<h3>`. As a result, the feature card headings do not receive the intended styling — a discrepancy that could indicate a structural accessibility issue if headings are later rearranged.
-- Fix: Align the CSS selector to match the actual heading level used in the HTML.
+New accessibility regressions should be filed as GitHub issues with the **accessibility** label as they are discovered. Automated checks and manual keyboard/AT verification are still required before release.
 
 ## 8. Machine-Readable Standards
 
@@ -133,4 +106,4 @@ We regularly review and update:
 - Assistive technology compatibility
 - Inclusive language in UI copy and documentation
 
-Last updated: 2026-03-09
+Last updated: 2026-04-10

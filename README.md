@@ -294,6 +294,7 @@ Transparency about AI use is a project requirement. This section documents all A
 | AI Tool | How It Was Used |
 |---------|----------------|
 | **GitHub Copilot** | Used during development to assist with code generation, refactoring, and writing documentation. All AI-assisted code was reviewed and tested by human contributors before merging. |
+| **OpenAI Codex (GPT-5)** | Used to review repository code and agent guidance, implement accessibility/documentation fixes, and add regression coverage. All changes remain subject to human review and testing. |
 
 ### Used When Running the Application
 

@@ -104,8 +104,6 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
   const domain = urlParams.get('domain');
 
   let initialUrl = paramUrl || defaultCsvUrl;
-  let isLoadingHealthcare = false;
-
   const sidebar = el("aside", {}, [
     el("h1", {}, [text("CSV Explorer")]),
     el("label", { for: "csvUrl" }, [text("CSV URL")]),
@@ -125,11 +123,10 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
     el("div", { id: "cachedList" }, [])
   ]);
 
-  const contentArea = el("main", {}, []);
+  const contentArea = el("main", { id: "main-content", tabindex: "-1" }, []);
   const wrapper = el("div", { style: "display: flex; height: 100vh;" }, [sidebar, contentArea]);
 
-  container.innerHTML = "";
-  container.appendChild(wrapper);
+  container.replaceChildren(wrapper);
 
   const status = sidebar.querySelector("#status");
   const cachedListContainer = sidebar.querySelector("#cachedList");
@@ -190,8 +187,7 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
   const updateCachedList = async () => {
     const cached = await getAllCachedDatasets();
     const cachedUrls = cached.map(d => d.url);
-    cachedListContainer.innerHTML = "";
-    cachedListContainer.appendChild(
+    cachedListContainer.replaceChildren(
       renderCachedDatasets(cachedUrls, loadDataset)
     );
   };
@@ -208,7 +204,6 @@ export async function mountDatasetExplorer({ root, defaultCsvUrl = "" }) {
 
   // Load healthcare.gov dataset if provided
   if (healthcareDatasetId && domain === 'healthcare.gov') {
-    isLoadingHealthcare = true;
     setStatus("Loading healthcare.gov dataset...");
     try {
       const metadata = await fetchHealthcareDataset(healthcareDatasetId);

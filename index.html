@@ -20,6 +20,24 @@
       padding: 2rem;
     }
 
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -999px;
+      z-index: 1000;
+      padding: 0.75rem 1rem;
+      background: #1f1f1f;
+      color: white;
+      border-radius: 0 0 6px 6px;
+      text-decoration: none;
+    }
+
+    .skip-link:focus {
+      top: 0;
+      outline: 3px solid #ffbf47;
+      outline-offset: 2px;
+    }
+
     .container {
       max-width: 1000px;
       margin: 0 auto;
@@ -208,7 +226,7 @@
       margin-bottom: 0.5rem;
     }
 
-    .feature h4 {
+    .feature h3 {
       color: #5048e5;
       margin-bottom: 0.5rem;
     }
@@ -331,16 +349,17 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="container">
     <header>
-      <h1>📊 CSV Dataset Explorer</h1>
+      <h1><span aria-hidden="true">📊 </span>CSV Dataset Explorer</h1>
       <p>Lightweight, accessible data dictionary for government health datasets</p>
     </header>
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <!-- Quick Start -->
       <section>
-        <h2>🚀 Quick Start</h2>
+        <h2><span aria-hidden="true">🚀 </span>Quick Start</h2>
         <div class="quick-start">
           <div class="card">
             <h3>Try the Demo</h3>
@@ -361,45 +380,45 @@
 
       <!-- Features -->
       <section>
-        <h2>✨ Features</h2>
+        <h2><span aria-hidden="true">✨ </span>Features</h2>
         <div class="features">
           <div class="feature">
-            <div class="feature-icon">📋</div>
+            <div class="feature-icon" aria-hidden="true">📋</div>
             <h3>Auto Schema</h3>
             <p>Infers field types and constraints from data</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">🔍</div>
+            <div class="feature-icon" aria-hidden="true">🔍</div>
             <h3>Field Search</h3>
             <p>Filter &amp; inspect columns instantly</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">✅</div>
+            <div class="feature-icon" aria-hidden="true">✅</div>
             <h3>Validation Rules</h3>
             <p>Auto-generated constraints per field</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">💾</div>
+            <div class="feature-icon" aria-hidden="true">💾</div>
             <h3>Local Cache</h3>
             <p>IndexedDB stores data in browser only</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">📤</div>
+            <div class="feature-icon" aria-hidden="true">📤</div>
             <h3>Export</h3>
             <p>Download schema as JSON or CSV</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">🤖</div>
+            <div class="feature-icon" aria-hidden="true">🤖</div>
             <h3>AI Prompts</h3>
             <p>Copy prompts for LLM analysis</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">♿</div>
+            <div class="feature-icon" aria-hidden="true">♿</div>
             <h3>Accessible</h3>
             <p>Keyboard-only, ARIA labels, screen readers</p>
           </div>
           <div class="feature">
-            <div class="feature-icon">🏥</div>
+            <div class="feature-icon" aria-hidden="true">🏥</div>
             <h3>Healthcare.gov</h3>
             <p>Direct integration via bookmarklet</p>
           </div>
@@ -408,7 +427,7 @@
 
       <!-- Bookmarklet Setup -->
       <section id="bookmarklet-installation">
-        <h2>🔖 Bookmarklet Installation</h2>
+        <h2><span aria-hidden="true">🔖 </span>Bookmarklet Installation</h2>
 
         <div class="installation">
           <p><strong>Drag this link to your bookmarks bar:</strong></p>
@@ -425,7 +444,7 @@
 
       <!-- Use Cases -->
       <section>
-        <h2>💡 Use Cases</h2>
+        <h2><span aria-hidden="true">💡 </span>Use Cases</h2>
 
         <div class="use-case">
           <h3>1. Explore Healthcare.gov Data</h3>
@@ -456,7 +475,7 @@
 
       <!-- API Endpoints -->
       <section>
-        <h2>🔌 API Endpoints (Server)</h2>
+        <h2><span aria-hidden="true">🔌 </span>API Endpoints (Server)</h2>
         <p>The backend proxy server provides these endpoints for programmatic access:</p>
 
         <div class="api-endpoint">
@@ -483,7 +502,7 @@
 
       <!-- Supported Domains -->
       <section>
-        <h2>🌐 Supported Data Portals</h2>
+        <h2><span aria-hidden="true">🌐 </span>Supported Data Portals</h2>
         <p>The proxy server handles CORS restrictions for these whitelisted domains:</p>
         <ul class="muted-list">
           <li><strong>healthcare.gov</strong> - Health datasets</li>
@@ -493,13 +512,13 @@
           <li><strong>github.com</strong> - CSV files in public repos</li>
         </ul>
         <div class="warning">
-          ⚠️ <strong>Other domains:</strong> Direct browser requests work if CORS allows. Otherwise, add the domain to <code>server.js</code> whitelist.
+          <span aria-hidden="true">⚠️ </span><strong>Other domains:</strong> Direct browser requests work if CORS allows. Otherwise, add the domain to <code>server.js</code> whitelist.
         </div>
       </section>
 
       <!-- Architecture -->
       <section>
-        <h2>🏗️ How It Works</h2>
+        <h2><span aria-hidden="true">🏗️ </span>How It Works</h2>
         <div class="code-block"><code>Browser                    Node.js Server (localhost:3000)
 ├─ CSV Explorer App        ├─ Express.js
 ├─ IndexedDB Cache         ├─ CORS Proxy
@@ -523,7 +542,7 @@ User browses, searches, exports (all local)</code></div>
 
       <!-- Security -->
       <section>
-        <h2>🔒 Security &amp; Privacy</h2>
+        <h2><span aria-hidden="true">🔒 </span>Security &amp; Privacy</h2>
         <ul class="muted-list">
           <li>✅ <strong>No data storage</strong> - Server is stateless, doesn't store any data</li>
           <li>✅ <strong>Client-side caching</strong> - Data stays in your browser (IndexedDB)</li>
@@ -535,7 +554,7 @@ User browses, searches, exports (all local)</code></div>
 
       <!-- Troubleshooting -->
       <section>
-        <h2>❓ Troubleshooting</h2>
+        <h2><span aria-hidden="true">❓ </span>Troubleshooting</h2>
 
         <div class="use-case">
           <h3>Bookmarklet not working</h3>
@@ -561,7 +580,7 @@ User browses, searches, exports (all local)</code></div>
 
       <!-- Getting Started -->
       <section>
-        <h2>📚 Next Steps</h2>
+        <h2><span aria-hidden="true">📚 </span>Next Steps</h2>
         <ol class="muted-list">
           <li><strong>Try the demo:</strong> <a href="/demo/" class="accent-link">Open demo</a></li>
           <li><strong>Install bookmarklet:</strong> Copy or drag the bookmark above</li>
@@ -588,21 +607,33 @@ User browses, searches, exports (all local)</code></div>
       const bookmarkletCode = `javascript:(function(){const PROXY_URL="${proxyUrl}";(async()=>{function getHealthcareDatasetId(){const m=window.location.pathname.match(/dataset\\/([a-z0-9\\-]+)/i);return m?m[1]:null}function findCsvUrls(){const links=[...document.querySelectorAll('a[href*=".csv"]')].map(a=>a.href);const scripts=[...document.scripts].map(s=>s.textContent).join(' ');const csvMatches=scripts.match(/https?:[^\\s"'<>]+\\.csv/gi)||[];return[...new Set([...links,...csvMatches])]}const hId=getHealthcareDatasetId();if(hId){return void(window.location.href=PROXY_URL+'/demo/?dataset='+hId+'&domain=healthcare.gov')}const csvUrls=findCsvUrls();if(csvUrls.length===1){return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(csvUrls[0]))}if(csvUrls.length>1){const selected=prompt('Multiple CSVs found. Paste one URL or select first:\\n'+csvUrls.slice(0,5).join('\\n'));return void(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(selected||csvUrls[0]))}const manualUrl=prompt('No CSVs found. Paste a CSV URL:');manualUrl&&(window.location.href=PROXY_URL+'/demo/?url='+encodeURIComponent(manualUrl))})()})();`;
 
       // Draggable link
-      document.getElementById('bookmarklet-link').innerHTML = `
-        <a href="${bookmarkletCode}" class="pill-link large-pill">📊 CSV Explorer</a>
-      `;
+      const bookmarkletLinkContainer = document.getElementById('bookmarklet-link');
+      const bookmarkletLink = document.createElement('a');
+      bookmarkletLink.href = bookmarkletCode;
+      bookmarkletLink.className = 'pill-link large-pill';
+      bookmarkletLink.textContent = 'CSV Explorer';
+      bookmarkletLinkContainer.replaceChildren(bookmarkletLink);
 
       // Minified code for manual installation
-      const escapedCode = bookmarkletCode.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;');
-      document.getElementById('bookmarklet-code-display').innerHTML = `
-        <div class="bookmarklet-code" tabindex="0" role="region" aria-label="Bookmarklet code">${escapedCode}</div>
-        <button type="button" onclick="navigator.clipboard.writeText(\`${bookmarkletCode.replace(/`/g, '\\`')}\`)
-          .then(() => alert('✓ Copied to clipboard!'))
-          .catch(() => alert('Failed to copy'))" 
-          class="btn-ghost secondary mt-075">
-          📋 Copy Code
-        </button>
-      `;
+      const codeDisplay = document.getElementById('bookmarklet-code-display');
+      const codeRegion = document.createElement('div');
+      codeRegion.className = 'bookmarklet-code';
+      codeRegion.tabIndex = 0;
+      codeRegion.setAttribute('role', 'region');
+      codeRegion.setAttribute('aria-label', 'Bookmarklet code');
+      codeRegion.textContent = bookmarkletCode;
+
+      const copyButton = document.createElement('button');
+      copyButton.type = 'button';
+      copyButton.className = 'btn-ghost secondary mt-075';
+      copyButton.textContent = 'Copy Code';
+      copyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(bookmarkletCode)
+          .then(() => alert('Copied to clipboard.'))
+          .catch(() => alert('Failed to copy.'));
+      });
+
+      codeDisplay.replaceChildren(codeRegion, copyButton);
 
       const demoLink = document.getElementById('demo-link');
       if (demoLink) demoLink.href = `${basePath}/demo/`;

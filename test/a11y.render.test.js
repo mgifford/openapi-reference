@@ -21,4 +21,26 @@ describe("a11y", () => {
     const results = await axe(document.body);
     expect(results).toHaveNoViolations();
   });
+
+  test("renderCsvReference includes an explicit label for field search", () => {
+    document.body.innerHTML = `<main id="root"></main>`;
+    const root = document.querySelector("#root");
+
+    const meta = {
+      fetchedAt: Date.now(),
+      rowCount: 10,
+      schema: [
+        { name: "FieldA", type: "string", examples: ["x", "y"] }
+      ]
+    };
+
+    renderCsvReference({ root, url: "https://example.com/x.csv", meta });
+
+    const label = document.querySelector('label[for="fieldSearch"]');
+    const input = document.querySelector("#fieldSearch");
+
+    expect(label).not.toBeNull();
+    expect(label.textContent).toBe("Search fields");
+    expect(input).not.toBeNull();
+  });
 });

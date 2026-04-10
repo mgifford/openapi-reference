@@ -89,7 +89,7 @@ It is intentionally:
 ## Definition of Done
 
 A change is complete when:
-- All tests pass (5/5)
+- All automated tests pass
 - HTML validation: 0 errors
 - Accessibility scan: 0 violations (Playwright + axe-core)
 - Security scan: 0 high-severity issues
@@ -154,6 +154,7 @@ Specifically:
    - Whether any user data is sent externally
 
 2. **If you are an AI coding assistant** (e.g., GitHub Copilot, Claude, GPT-4, Cursor), update the "Used to Build This Project" table to reflect your involvement if the tool is not already listed.
+   - This includes Codex / GPT-5-based coding assistance when used for repository changes or documentation updates.
 
 3. **Do not add AI tools that were not actually used.** Accuracy matters more than completeness.
 

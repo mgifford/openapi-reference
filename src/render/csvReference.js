@@ -56,6 +56,7 @@ function renderSchemaTable(schema) {
 
 function renderFieldSearch(schema) {
   const searchContainer = el("div", { style: "margin-bottom: 1.5rem;" }, [
+    el("label", { for: "fieldSearch", class: "visually-hidden" }, [text("Search fields")]),
     el("input", {
       type: "text",
       id: "fieldSearch",
@@ -189,7 +190,7 @@ function renderSqlQueryExamples(url, meta) {
 }
 
 export function renderCsvReference({ root, url, meta, datasetTitle }) {
-  root.innerHTML = "";
+  root.replaceChildren();
 
   root.appendChild(el("h1", {}, [text("Dataset Explorer")]));
 
@@ -296,5 +297,4 @@ Provide:
 
   root.appendChild(promptSection);
 }
-
 

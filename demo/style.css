@@ -322,6 +322,45 @@ table tbody tr:hover {
   margin-top: 0.75rem;
 }
 
+.ai-output {
+  margin-top: 1rem;
+}
+
+.ai-result {
+  background: #f4fbf4;
+  border: 1px solid #8ac78a;
+  border-radius: 6px;
+  padding: 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ai-generated-label {
+  background: #eef6ff;
+  border-left: 4px solid #0052a3;
+  border-radius: 4px;
+  color: #1f3a5f;
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+}
+
+.ai-disclaimer,
+.ai-unavailable {
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.ai-support-list {
+  margin-top: 0.75rem;
+}
+
+.ai-unavailable {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+
 pre {
   background: #fff;
   border: 1px solid #e0e0e0;

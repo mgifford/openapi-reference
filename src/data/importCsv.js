@@ -1,5 +1,6 @@
 import { parseCsv } from "../csv/parse.js";
 import { inferSchema } from "../csv/infer.js";
+import { profileDataset } from "./profile.js";
 import { clearDataset, getDatasetMeta, putChunk, putDatasetMeta, getChunk, openDb } from "./db.js";
 
 const DEFAULT_CHUNK_SIZE = 1000;
@@ -105,6 +106,7 @@ export async function importCsvFromUrl(url, { chunkSize = DEFAULT_CHUNK_SIZE, fo
   const dataRows = table.slice(1);
 
   const schema = inferSchema(headers, dataRows);
+  const profile = profileDataset(headers, dataRows.slice(0, 1000), schema);
 
   await clearDataset(url);
 
@@ -122,7 +124,9 @@ export async function importCsvFromUrl(url, { chunkSize = DEFAULT_CHUNK_SIZE, fo
     rowCount: dataRows.length,
     chunkSize,
     chunkCount: chunks.length,
-    schema
+    schema,
+    profile,
+    profileSampleSize: Math.min(dataRows.length, 1000)
   };
 
   await putDatasetMeta(meta);

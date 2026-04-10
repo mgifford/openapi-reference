@@ -1,4 +1,11 @@
 import { el, text, button } from "./components.js";
+import {
+  buildCsvExplorerExplainPrompt,
+  buildCsvExplorerQuestionsPrompt,
+  getBuiltinAiBrowserSupport,
+  isBuiltinAiAvailable,
+  runBuiltinAi
+} from "../ai/prompts/dataset.js";
 
 // Pure builder for DKAN SQL examples so tests can validate without DOM
 export function buildDkanSqlExamples(datasetId, schema) {
@@ -126,6 +133,110 @@ function renderExportOptions(meta, url) {
   ]);
 }
 
+function renderAiExplorerSection(url, meta, datasetTitle) {
+  const aiAvailable = isBuiltinAiAvailable();
+  const explainPrompt = buildCsvExplorerExplainPrompt({ title: datasetTitle, url, meta });
+  const questionsPrompt = buildCsvExplorerQuestionsPrompt({ title: datasetTitle, url, meta });
+  const outputEl = el("div", { role: "status", "aria-live": "polite", class: "ai-output" }, []);
+  const browserSupport = getBuiltinAiBrowserSupport(typeof navigator !== "undefined" ? navigator.userAgent : "");
+
+  const renderResult = (title, content) => {
+    outputEl.replaceChildren(
+      el("p", { class: "ai-generated-label" }, [
+        text("AI-generated using your browser's built-in LLM. Review against the official dataset documentation before relying on it.")
+      ]),
+      el("h3", {}, [text(title)]),
+      el("pre", { class: "ai-result" }, [text(content)]),
+      el("p", { class: "ai-disclaimer" }, [
+        text("The summary is based on locally available metadata and inferred structure, not an authoritative field dictionary.")
+      ])
+    );
+  };
+
+  const section = el("section", {}, [
+    el("h2", {}, [text("Explore with Built-in AI")]),
+    el("p", {}, [text(
+      aiAvailable
+        ? "If your browser supports built-in AI, you can generate an on-device summary and suggested questions for this CSV. Any generated text comes from your browser's local LLM rather than a remote AI service."
+        : "Built-in browser AI is not available here, but you can still use the copyable prompts below with an external AI tool if you choose."
+    )]),
+    el("p", { class: "ai-generated-label" }, [
+      text("Any response shown in this section is AI-generated using the browser's built-in LLM when available.")
+    ]),
+    el("ul", { class: "ai-support-list" }, browserSupport.map(browser =>
+      el("li", {}, [
+        el("strong", {}, [text(`${browser.label}: `)]),
+        text(`${browser.status}. ${browser.detail}${browser.isCurrent ? " You are using this browser now." : ""}`)
+      ])
+    ))
+  ]);
+
+  if (meta.profile) {
+    section.appendChild(el("p", {}, [text(
+      `Prompts in this section use inferred structure from a local sample of ${meta.profileSampleSize || meta.profile.rowCount || 0} rows, including likely identifiers, date fields, geography fields, and missing-data hints.`
+    )]));
+  }
+
+  if (aiAvailable) {
+    const explainBtn = button("Explain this dataset", async () => {
+      explainBtn.disabled = true;
+      askBtn.disabled = true;
+      outputEl.textContent = "Generating plain-language explanation…";
+      try {
+        const result = await runBuiltinAi(explainPrompt);
+        renderResult("Plain-language explanation", result);
+      } catch (err) {
+        outputEl.textContent = `AI generation failed: ${err.message}`;
+      } finally {
+        explainBtn.disabled = false;
+        askBtn.disabled = false;
+      }
+    });
+
+    const askBtn = button("Suggest questions to ask", async () => {
+      explainBtn.disabled = true;
+      askBtn.disabled = true;
+      outputEl.textContent = "Generating suggested questions…";
+      try {
+        const result = await runBuiltinAi(questionsPrompt);
+        renderResult("Suggested questions", result);
+      } catch (err) {
+        outputEl.textContent = `AI generation failed: ${err.message}`;
+      } finally {
+        explainBtn.disabled = false;
+        askBtn.disabled = false;
+      }
+    });
+
+    section.appendChild(el("div", { class: "button-group" }, [explainBtn, askBtn]));
+  } else {
+    section.appendChild(el("p", { class: "ai-unavailable" }, [
+      text("Chrome Built-in AI is not available in this browser.")
+    ]));
+  }
+
+  section.appendChild(el("details", {}, [
+    el("summary", {}, [text("Show copyable explanation prompt")]),
+    el("pre", {}, [text(explainPrompt)]),
+    button("Copy explanation prompt", async () => {
+      await navigator.clipboard.writeText(explainPrompt);
+      alert("Prompt copied to clipboard");
+    }, { class: "secondary-btn" })
+  ]));
+
+  section.appendChild(el("details", {}, [
+    el("summary", {}, [text("Show copyable question prompt")]),
+    el("pre", {}, [text(questionsPrompt)]),
+    button("Copy question prompt", async () => {
+      await navigator.clipboard.writeText(questionsPrompt);
+      alert("Prompt copied to clipboard");
+    }, { class: "secondary-btn" })
+  ]));
+
+  section.appendChild(outputEl);
+  return section;
+}
+
 function renderDataValidationRules(schema) {
   const rules = schema.map(col => {
     let rule = `${col.name} (${col.type})`;
@@ -221,6 +332,7 @@ export function renderCsvReference({ root, url, meta, datasetTitle }) {
   ]));
 
   root.appendChild(renderSampleQueries(meta.schema));
+  root.appendChild(renderAiExplorerSection(url, meta, datasetTitle));
   root.appendChild(renderSqlQueryExamples(url, meta));
   root.appendChild(renderDataValidationRules(meta.schema));
   root.appendChild(renderExportOptions(meta, url));
@@ -275,7 +387,7 @@ Provide:
 
   const promptSection = el("section", {}, [
     el("h2", {}, [text("Copyable prompt templates")]),
-    el("p", {}, [text("Plain text prompts users can paste into any AI tool. This site does not embed or call AI.")]),
+    el("p", {}, [text("Plain text prompts users can paste into any AI tool. If built-in browser AI is available, the separate section above can also run on-device assistance locally.")]),
     el("div", { class: "prompt-block" }, [
       el("h3", {}, [text("Explain this dataset")]),
       el("pre", {}, [text(explainPrompt)]),
@@ -297,4 +409,3 @@ Provide:
 
   root.appendChild(promptSection);
 }
-

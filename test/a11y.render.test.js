@@ -43,4 +43,30 @@ describe("a11y", () => {
     expect(label.textContent).toBe("Search fields");
     expect(input).not.toBeNull();
   });
+
+  test("renderCsvReference shows built-in AI fallback prompts when browser AI is unavailable", () => {
+    document.body.innerHTML = `<main id="root"></main>`;
+    const root = document.querySelector("#root");
+
+    const meta = {
+      fetchedAt: Date.now(),
+      rowCount: 10,
+      schema: [
+        { name: "Facility Name", type: "string", examples: ["Example Clinic"] },
+        { name: "State", type: "string", examples: ["MD"] }
+      ]
+    };
+
+    delete window.ai;
+
+    renderCsvReference({ root, url: "https://example.com/x.csv", meta, datasetTitle: "Example dataset" });
+
+    expect(root.textContent).toContain("Explore with Built-in AI");
+    expect(root.textContent).toContain("Chrome Built-in AI is not available in this browser.");
+    expect(root.textContent).toContain("Show copyable explanation prompt");
+    expect(root.textContent).toContain("Show copyable question prompt");
+    expect(root.textContent).toContain("Chrome:");
+    expect(root.textContent).toContain("Edge:");
+    expect(root.textContent).toContain("Firefox:");
+  });
 });

@@ -131,6 +131,163 @@ ${DISCLAIMER}`;
 }
 
 /**
+ * Build a plain-language prompt for the CSV explorer using inferred schema only.
+ *
+ * @param {object} opts
+ * @param {string} opts.title
+ * @param {string} opts.url
+ * @param {object} opts.meta
+ * @returns {string}
+ */
+export function buildCsvExplorerExplainPrompt({ title, url, meta }) {
+  const profile = meta.profile || null;
+  const schemaLines = ((profile && profile.fields) || meta.schema || [])
+    .slice(0, 25)
+    .map(field => {
+      const roleText = field.role ? `, role: ${field.role}` : "";
+      const missingText = typeof field.missingPct === "number" && field.missingPct > 0 ? `, ${field.missingPct}% missing` : "";
+      return `- ${field.name} (${field.type}${roleText}${missingText}): examples: ${(field.examples || []).slice(0, 4).join("; ") || "(no examples)"}`;
+    })
+    .join("\n");
+
+  const profileLines = profile
+    ? `
+Profile hints (inferred from a local sample of ${meta.profileSampleSize || profile.rowCount || 0} rows):
+- Candidate identifiers: ${profile.primaryKeyCandidates.join(", ") || "(none identified)"}
+- Likely join or geography fields: ${profile.likelyJoinKeys.join(", ") || "(none identified)"}
+- Date or period fields: ${profile.dateFields.join(", ") || "(none identified)"}
+- Sparsest fields: ${profile.sparsestFields.map(field => `${field.name} (${field.missingPct}% missing)`).join(", ") || "(none identified)"}`
+    : "";
+
+  return `You are helping a non-technical person understand a public open-data CSV.
+
+Dataset title: ${title || "Unknown"}
+Source URL: ${url}
+Rows cached locally: ${meta.rowCount || 0}
+Fields detected: ${(meta.schema || []).length}
+
+Fields (inferred from the CSV header and sample values):
+${schemaLines}
+${profileLines}
+
+Task:
+1) Explain in plain language what this dataset appears to cover.
+2) Identify the most important fields for a first-time reader.
+3) Suggest 5 useful questions a person could explore with this dataset.
+4) Call out any limits, ambiguity, or likely missing context visible from the field names and examples.
+
+Rules:
+- Flag all interpretations as inferred.
+- Do not invent facts not supported by the fields, examples, or source URL.
+- Do not give policy, legal, or medical advice.
+
+Derived from a locally loaded public CSV. Interpretations are assistive only.`;
+}
+
+/**
+ * Build a question-generation prompt for the CSV explorer using inferred schema only.
+ *
+ * @param {object} opts
+ * @param {string} opts.title
+ * @param {string} opts.url
+ * @param {object} opts.meta
+ * @returns {string}
+ */
+export function buildCsvExplorerQuestionsPrompt({ title, url, meta }) {
+  const profile = meta.profile || null;
+  const schemaLines = ((profile && profile.fields) || meta.schema || [])
+    .slice(0, 25)
+    .map(field => {
+      const roleText = field.role ? `, role: ${field.role}` : "";
+      return `- ${field.name} (${field.type}${roleText})`;
+    })
+    .join("\n");
+
+  const profileLines = profile
+    ? `
+Profile hints (inferred from a local sample of ${meta.profileSampleSize || profile.rowCount || 0} rows):
+- Candidate identifiers: ${profile.primaryKeyCandidates.join(", ") || "(none identified)"}
+- Likely join or geography fields: ${profile.likelyJoinKeys.join(", ") || "(none identified)"}
+- Date or period fields: ${profile.dateFields.join(", ") || "(none identified)"}`
+    : "";
+
+  return `You are helping someone explore a public open-data CSV before doing deeper analysis.
+
+Dataset title: ${title || "Unknown"}
+Source URL: ${url}
+Rows cached locally: ${meta.rowCount || 0}
+Fields detected: ${(meta.schema || []).length}
+
+Fields:
+${schemaLines}
+${profileLines}
+
+Generate 8 to 12 concrete questions the user might want to ask next.
+Focus on:
+- what the dataset measures
+- who or what each row likely represents
+- time coverage
+- geography
+- notable counts, rates, or identifiers
+- missing context the user should verify in the official documentation
+
+Rules:
+- Output only the questions as a bullet list.
+- Base every question on the field names and metadata above.
+- Flag uncertainty through wording like "appears" or "may".
+
+Derived from a locally loaded public CSV. Interpretations are assistive only.`;
+}
+
+/**
+ * Detect the current browser family from a user agent string.
+ *
+ * @param {string} [userAgent]
+ * @returns {"edge"|"chrome"|"firefox"|"other"}
+ */
+export function detectBrowserFamily(userAgent = "") {
+  const ua = String(userAgent || "").toLowerCase();
+  if (ua.includes("edg/")) return "edge";
+  if (ua.includes("firefox/")) return "firefox";
+  if (ua.includes("chrome/") || ua.includes("chromium/")) return "chrome";
+  return "other";
+}
+
+/**
+ * Return a conservative browser support summary for built-in browser AI.
+ *
+ * @param {string} [userAgent]
+ * @returns {Array<{id:string,label:string,status:string,detail:string,isCurrent:boolean}>}
+ */
+export function getBuiltinAiBrowserSupport(userAgent = "") {
+  const current = detectBrowserFamily(userAgent);
+
+  return [
+    {
+      id: "chrome",
+      label: "Chrome",
+      status: "supported on desktop",
+      detail: "Best fit for built-in AI today, subject to version, hardware, storage, and model availability.",
+      isCurrent: current === "chrome"
+    },
+    {
+      id: "edge",
+      label: "Edge",
+      status: "preview support",
+      detail: "Built-in AI support is emerging in Edge, but the Prompt API is still preview-oriented and more limited than Chrome.",
+      isCurrent: current === "edge"
+    },
+    {
+      id: "firefox",
+      label: "Firefox",
+      status: "not natively available",
+      detail: "Firefox is exploring browser AI features, but this explorer does not expect native built-in AI support there today.",
+      isCurrent: current === "firefox"
+    }
+  ];
+}
+
+/**
  * Detect whether Chrome Built-in AI (window.ai) is available.
  * Safe to call in any browser context.
  *

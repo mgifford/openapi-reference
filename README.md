@@ -300,10 +300,10 @@ Transparency about AI use is a project requirement. This section documents all A
 
 | AI Tool | How It Is Used | Data Sent? |
 |---------|---------------|------------|
-| **Chrome Built-in AI (`window.ai`)** | Optional plain-language summaries in the DKAN Companion | No — runs locally on-device |
+| **Chrome Built-in AI (`window.ai`)** | Optional plain-language summaries and question generation in the CSV Explorer and DKAN Companion | No — runs locally on-device |
 
 **Chrome Built-in AI details:**
-- Powers the "Generate explanation (Built-in AI)" and "Generate more questions (Built-in AI)" buttons in the DKAN Open Data Companion
+- Powers optional on-device explanation and question-generation actions in the CSV Explorer and DKAN Open Data Companion
 - Uses the browser's on-device model (Gemini Nano via `window.ai.languageModel`)
 - Only activates when the user explicitly clicks the button and only if the browser supports `window.ai`
 - All inference runs locally in the browser — no data is sent to any external server
